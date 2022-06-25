@@ -179,7 +179,7 @@ class Environment:
 
 
 class Agent:
-    def __init__(self, id, x_start, y_start, radius, color, random_seed, hidden_size=256, state_size=30, action_size=3, action_prior="uniform"):
+    def __init__(self, id, x_start, y_start, radius, color, random_seed=2023, hidden_size=256, state_size=30, action_size=3, action_prior="uniform"):
         self.id = id
         self.x = x_start
         self.y = y_start
@@ -307,15 +307,26 @@ class Agent:
 
 
 env = Environment()
-agents = [Agent() for _ in range(4)]
+x_agents = [300, 300, 500, 500]
+y_agents = [300, 500, 300, 500]
+color = {0: (220, 220, 0), 1: (0, 220, 220), 2: (220, 0, 220), 3: (220, 0, 0)}
+agents = [Agent(i, x_agents[i], y_agents[i], 20, color[i]) for i in range(4)]
 running = True
+max_steps = 1000000
 
 frame_cap = 1.0 / 60
 time_1 = time.perf_counter()
 unprocessed = 0
 
+manager = enlighten.get_manager()
+status_format = '{program}{fill}Social RL: {agents}{fill} Status {status}'
+status_bar = manager.status_bar(status_format=status_format, color='bold_slategray', program="Soft Actor-Critic (SAC)", agents="Four Agents (Free World)", status='Training')
+ticks = manager.counter(total=max_steps, desc="Training step", unit="ticks", color="red")
+
+steps = 0
 state = env.get_state()
 while running:
+    ticks.update(0)
     can_render = False
     time_2 = time.perf_counter()
     passed = time_2 - time_1
@@ -328,7 +339,8 @@ while running:
 
     if can_render:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or max_steps <= steps:
+                status_bar.update(status='Ending')
                 running = False
 
         actions = []
@@ -341,10 +353,8 @@ while running:
         env.render(agents)
         next_state = env.get_state()
 
-        states = [state] * 4
-        next_states = [next_state] * 4
-
-        for agent, action, reward, next_state, done in zip(agents, actions, rewards, next_states):
+        for agent, action, reward in zip(agents, actions, rewards):
             agent.optimize(state, action, reward, next_state)
-
+        ticks.update(1)
+        steps += 1
         state = next_state
