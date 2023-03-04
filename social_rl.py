@@ -164,9 +164,9 @@ class Environment:
             pygame.display.flip()
 
     def get_state(self):
-        surface = pygame.Surface((100, 200))
+        surface = pygame.Surface((200, 200))
         data = pygame.image.tobytes(surface, 'RGBA')
-        state = Image.frombytes('RGBA', (100, 200), data)
+        state = Image.frombytes('RGBA', (200, 200), data)
         plt.imshow(state)
         plt.show()
         state = np.asarray(state)
@@ -331,7 +331,7 @@ steps = 0
 state = env.get_state()
 while running:
     ticks.update(0)
-    can_render = True
+    can_render = False
     time_2 = time.perf_counter()
     passed = time_2 - time_1
     unprocessed += passed
