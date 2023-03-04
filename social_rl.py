@@ -67,8 +67,8 @@ class Actor(nn.Module):
         self.log_std_linear = nn.Linear(hidden_size, action_size)
 
     def forward(self, state):
-        state = state.unsqueeze(1)
-        print(state.shape)
+        # state = state.unsqueeze(1)
+        # print(state.shape)
         x = F.relu(self.conv1(state))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
@@ -169,7 +169,7 @@ class Environment:
         state = np.asarray(state)[:, :, :3]
         plt.imshow(state)
         plt.show()
-        state = state.reshape((3, self.x_boundary, self.y_boundary))
+        state = state.reshape((1, 3, self.x_boundary, self.y_boundary))
         pygame.display.flip()
         return state
 
