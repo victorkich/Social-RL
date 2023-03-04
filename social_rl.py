@@ -164,8 +164,8 @@ class Environment:
 
     def get_state(self):
         surface = pygame.Surface((100, 200))
-        data = pygame.image.tostring(surface, 'RGBA')
-        state = Image.fromstring('RGBA', (100, 200), data)
+        data = pygame.image.tobytes(surface, 'RGBA')
+        state = Image.frombytes('RGBA', (100, 200), data)
         return state
 
     def grab_event(self, agent):
