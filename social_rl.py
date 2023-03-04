@@ -170,7 +170,7 @@ class Environment:
         state = np.asarray(state)[:, :, :3]
         plt.imshow(state)
         plt.show()
-        state = state.reshape((1, 3, self.x_boundary, self.y_boundary))
+        state = state.reshape((1, 3, 200, 200))
         pygame.display.flip()
         return state
 
