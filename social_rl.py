@@ -164,7 +164,7 @@ class Environment:
             pygame.display.flip()
 
     def get_state(self):
-        surface = pygame.Surface((200, 200))
+        surface = pygame.Surface.copy()
         data = pygame.image.tobytes(surface, 'RGBA')
         state = Image.frombytes('RGBA', (200, 200), data)
         plt.imshow(state)
