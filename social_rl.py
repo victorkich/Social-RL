@@ -346,7 +346,9 @@ while running:
 
         actions = []
         rewards = []
-        print('State:', state)
+        for st in state:
+            print(len(st))
+
         for agent in agents:
             action = agent.get_action(state)
             reward = agent.step(action, env)
