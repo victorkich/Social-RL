@@ -272,7 +272,7 @@ class Agent:
         Q_target_next = torch.min(Q_target1_next, Q_target2_next)
 
         Q_targets = rewards + (self.gamma * (Q_target_next - self.alpha * log_pis_next))
-        print(Q_target_next.shape, len(rewards), len(log_pis_next))
+        print(Q_target_next.shape, rewards.shape, log_pis_next.shape)
 
         # Compute critic loss
         Q_1 = self.critic1(states, actions)
