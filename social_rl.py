@@ -185,7 +185,7 @@ class Environment:
 
 
 class Agent:
-    def __init__(self, id, x_start, y_start, radius, color, random_seed=2023, hidden_size=256, state_size=30, action_size=3, action_prior="uniform"):
+    def __init__(self, id, x_start, y_start, radius, color, random_seed=2023, hidden_size=256, state_size=484, action_size=3, action_prior="uniform"):
         self.id = id
         self.x = x_start
         self.y = y_start
