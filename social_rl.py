@@ -363,8 +363,8 @@ while running:
                     running = False
 
         keys = pygame.key.get_pressed()
-        action[1] += (keys[pygame.K_d] - keys[pygame.K_a]) * vel
-        action[0] += (keys[pygame.K_s] - keys[pygame.K_w]) * vel
+        action[0] += (keys[pygame.K_d] - keys[pygame.K_a]) * vel
+        action[1] += (keys[pygame.K_s] - keys[pygame.K_w]) * vel
 
         #actions = []
         #rewards = []
