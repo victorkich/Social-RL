@@ -73,8 +73,8 @@ class Actor(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = self.flatten(x)
-        x = F.relu(self.fc1(x), inplace=True)
-        x = F.relu(self.fc2(x), inplace=True)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
         mu = self.mu(x)
 
         log_std = self.log_std_linear(x)
@@ -104,6 +104,13 @@ class Critic(nn.Module):
     def __init__(self, state_size, action_size, seed, hidden_size=32):
         super(Critic, self).__init__()
         self.seed = torch.manual_seed(seed)
+
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5), stride=2, padding=0)
+        self.conv2 = nn.Conv2d(in_channels=6, out_channels=3, kernel_size=(5, 5), stride=2, padding=0)
+        self.conv3 = nn.Conv2d(in_channels=3, out_channels=1, kernel_size=(5, 5), stride=2, padding=0)
+
+        self.flatten = nn.Flatten()
+
         self.fc1 = nn.Linear(state_size + action_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, 1)
@@ -115,7 +122,11 @@ class Critic(nn.Module):
         self.fc3.weight.data.uniform_(-3e-3, 3e-3)
 
     def forward(self, state, action):
-        x = torch.cat((state, action), dim=1)
+        x = F.relu(self.conv1(state))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = self.flatten(x)
+        x = torch.cat((x, action), dim=1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         return self.fc3(x)
