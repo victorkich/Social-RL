@@ -146,6 +146,12 @@ class Environment:
         self.y_locks = [400, 150, 650, 400]
         self.lock_radius = 30
 
+        self.coin_radius = 10
+        self.x_coins = [50, 50, 750, 750]
+        self.y_coins = [50, 750, 50, 750]
+        self.carried_coins = [False, False, False, False]
+        self.coins_at_banks = [0, 0, 0, 0]
+
         self.scr = pygame.display.set_mode((self.x_boundary, self.y_boundary))
         pygame.display.set_caption('Social RL')
 
@@ -165,6 +171,10 @@ class Environment:
             pygame.draw.circle(self.scr, (0, 0, 200), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
             pygame.draw.circle(self.scr, (0, 200, 0), (self.x_jobs[i], self.y_jobs[i]), self.job_radius)
             pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
+            if not self.carried_coins[i]:
+                pygame.draw.circle(self.scr, (0, 0, 0), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
+            else:
+                pygame.draw.circle(self.scr, (0, 0, 0), (agents[i].x_coin, agents[i].y_coin), self.coin_radius)
 
         for agent in agents:
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
@@ -201,6 +211,10 @@ class Agent:
         self.gamma = 0.99
         self.tau = 1e-2
         self.memory = int(2e5)
+
+        self.grabbed_coin = False
+        self.x_coin = x_start
+        self.y_coin = y_start
 
         self.state_size = state_size
         self.action_size = action_size
