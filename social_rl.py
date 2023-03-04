@@ -166,15 +166,8 @@ class Environment:
         state = np.asarray(state)
         pygame.display.flip()
         plt.imshow(state)
+        plt.show()
         return state
-
-        # surface = pygame.Surface.copy()
-        # data = pygame.image.tobytes(surface, 'RGBA')
-        # state = Image.frombytes('RGBA', (200, 200), data)
-
-        #plt.show()
-        #state = np.asarray(state)
-        #return state
 
     def grab_event(self, agent):
         pass
