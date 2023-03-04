@@ -325,7 +325,6 @@ status_bar = manager.status_bar(status_format=status_format, color='bold_slategr
 ticks = manager.counter(total=max_steps, desc="Training step", unit="ticks", color="red")
 
 steps = 0
-# env.render(agents, render=True)
 state = env.get_state()
 while running:
     ticks.update(0)
@@ -347,12 +346,12 @@ while running:
 
         actions = []
         rewards = []
+        print('State:', state)
         for agent in agents:
             action = agent.get_action(state)
             reward = agent.step(action, env)
             actions.append(action)
             rewards.append(reward)
-        # env.render(agents, render=can_render)
         next_state = env.get_state()
 
         for agent, action, reward in zip(agents, actions, rewards):
