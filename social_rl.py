@@ -67,7 +67,7 @@ class Actor(nn.Module):
         self.log_std_linear = nn.Linear(hidden_size, action_size)
 
     def forward(self, state):
-        x = F.relu(self.conv1(state))
+        x = F.relu(self.conv1(state).unsqueeze(1))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = self.flatten(x)
