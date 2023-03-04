@@ -274,18 +274,15 @@ class Agent:
 
         Q_target1_next = self.critic1_target(next_states, next_action)
         Q_target2_next = self.critic2_target(next_states, next_action)
-        print("QS:", Q_target1_next.shape, Q_target2_next.shape)
 
         # take the mean of both critics for updating
         Q_target_next = torch.min(Q_target1_next, Q_target2_next)
 
         Q_targets = rewards.cpu() + (self.gamma * (Q_target_next.cpu() - self.alpha * log_pis_next.cpu()))
-        print(Q_target_next.shape, rewards.shape, log_pis_next.shape)
 
         # Compute critic loss
-        Q_1 = self.critic1(states, actions)
-        Q_2 = self.critic2(states, actions)
-        print('Q_1:', Q_1.shape, 'Q_TARGETS:', Q_targets.shape)
+        Q_1 = self.critic1(states, actions).cpu()
+        Q_2 = self.critic2(states, actions).cpu()
         critic1_loss = 0.5 * F.mse_loss(Q_1, Q_targets.detach())
         critic2_loss = 0.5 * F.mse_loss(Q_2, Q_targets.detach())
         # Update critics
