@@ -54,9 +54,9 @@ class Actor(nn.Module):
         self.log_std_min = log_std_min
         self.log_std_max = log_std_max
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=5, stride=2, padding=0)
-        self.conv2 = nn.Conv2d(in_channels=6, out_channels=3, kernel_size=5, stride=2, padding=0)
-        self.conv3 = nn.Conv2d(in_channels=3, out_channels=1, kernel_size=5, stride=2, padding=0)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5), stride=2, padding=0)
+        self.conv2 = nn.Conv2d(in_channels=6, out_channels=3, kernel_size=(5, 5), stride=2, padding=0)
+        self.conv3 = nn.Conv2d(in_channels=3, out_channels=1, kernel_size=(5, 5), stride=2, padding=0)
 
         self.flatten = nn.Flatten()
 
