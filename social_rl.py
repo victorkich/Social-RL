@@ -67,8 +67,6 @@ class Actor(nn.Module):
         self.log_std_linear = nn.Linear(hidden_size, action_size)
 
     def forward(self, state):
-        # state = state.unsqueeze(1)
-        # print(state.shape)
         x = F.relu(self.conv1(state))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
@@ -171,7 +169,6 @@ class Environment:
             pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
 
         for agent in agents:
-            print(self.scr, agent.color, (agent.x, agent.y), agent.radius)
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
         # pygame.Surface.convert(self.scr)
@@ -180,8 +177,6 @@ class Environment:
         state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
         state = state.resize((200, 200))
         state = np.asarray(state)[:, :, :3]
-        # plt.imshow(state)
-        # plt.show()
         state = state.reshape((1, 3, 200, 200))
         pygame.display.flip()
         return state
@@ -364,7 +359,6 @@ while running:
         actions = []
         rewards = []
 
-        print(len(state))
         for agent in agents:
             action = agent.get_action(state)
             reward = agent.step(action, env)
