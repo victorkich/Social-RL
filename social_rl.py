@@ -86,7 +86,7 @@ class Actor(nn.Module):
         dist = Normal(batch_mu, batch_sigma)
         z = dist.sample()
         action = torch.tanh(z)
-        log_prob = dist.log_prob(z) - torch.log(1 - action.pow(2) + min_Val)
+        log_prob = dist.log_prob(z) - torch.log(1 - action.pow(2) + epsilon)
 
         #mu, log_std = self.forward(state)
         #std = log_std.exp()
