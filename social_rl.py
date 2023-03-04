@@ -140,7 +140,10 @@ class Environment:
         self.scr = pygame.display.set_mode((self.x_boundary, self.y_boundary))
         pygame.display.set_caption('Social RL')
 
-    def render(self, agents, render=True):
+    #def render(self, agents, render=True):
+
+
+    def get_state(self):
         for agent in agents:
             if agent.x > self.x_boundary - agent.radius:
                 agent.x = self.x_boundary - agent.radius
@@ -151,28 +154,28 @@ class Environment:
             elif agent.y < agent.radius:
                 agent.y = agent.radius
 
-        if render:
-            self.scr.fill((0, 0, 0))
-            for i in range(4):
-                pygame.draw.circle(self.scr, (0, 0, 200), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
-                pygame.draw.circle(self.scr, (0, 200, 0), (self.x_jobs[i], self.y_jobs[i]), self.job_radius)
-                pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
+        self.scr.fill((0, 0, 0))
+        for i in range(4):
+            pygame.draw.circle(self.scr, (0, 0, 200), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
+            pygame.draw.circle(self.scr, (0, 200, 0), (self.x_jobs[i], self.y_jobs[i]), self.job_radius)
+            pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
 
-            for agent in agents:
-                pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
+        for agent in agents:
+            pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
-            surface = pygame.Surface.copy(self.scr)
-            state = np.asarray(surface)
-            pygame.display.flip()
-
-    def get_state(self):
-        surface = pygame.Surface.copy()
-        data = pygame.image.tobytes(surface, 'RGBA')
-        state = Image.frombytes('RGBA', (200, 200), data)
+        surface = pygame.Surface.copy(self.scr)
+        state = np.asarray(surface)
+        pygame.display.flip()
         plt.imshow(state)
-        plt.show()
-        state = np.asarray(state)
         return state
+
+        # surface = pygame.Surface.copy()
+        # data = pygame.image.tobytes(surface, 'RGBA')
+        # state = Image.frombytes('RGBA', (200, 200), data)
+
+        #plt.show()
+        #state = np.asarray(state)
+        #return state
 
     def grab_event(self, agent):
         pass
@@ -330,7 +333,7 @@ status_bar = manager.status_bar(status_format=status_format, color='bold_slategr
 ticks = manager.counter(total=max_steps, desc="Training step", unit="ticks", color="red")
 
 steps = 0
-env.render(agents, render=True)
+# env.render(agents, render=True)
 state = env.get_state()
 while running:
     ticks.update(0)
@@ -357,7 +360,7 @@ while running:
             reward = agent.step(action, env)
             actions.append(action)
             rewards.append(reward)
-        env.render(agents, render=can_render)
+        # env.render(agents, render=can_render)
         next_state = env.get_state()
 
         for agent, action, reward in zip(agents, actions, rewards):
