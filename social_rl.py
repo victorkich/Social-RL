@@ -164,7 +164,9 @@ class Environment:
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
         surface = pygame.Surface.copy(self.scr)
-        state = np.asarray(surface)
+        data = pygame.image.tobytes(surface, 'RGBA')
+        state = Image.frombytes('RGBA', self.scr, data)
+        state = np.asarray(state)
         pygame.display.flip()
         plt.imshow(state)
         return state
