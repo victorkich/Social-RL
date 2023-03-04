@@ -329,6 +329,7 @@ max_steps = 1000000
 frame_cap = 1.0 / 60
 time_1 = time.perf_counter()
 unprocessed = 0
+vel = 10
 
 manager = enlighten.get_manager()
 status_format = '{program}{fill}Social RL: {agents}{fill} Status {status}'
@@ -357,17 +358,13 @@ while running:
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_w:
-                    action[1] -= 10
-                if event.key == pygame.K_s:
-                    action[1] += 10
-                if event.key == pygame.K_a:
-                    action[0] -= 10
-                if event.key == pygame.K_d:
-                    action[0] += 10
                 if event.key == pygame.K_q:
                     status_bar.update(status='Ending')
                     running = False
+
+        keys = pygame.key.get_pressed()
+        action[1] += (keys[pygame.K_d] - keys[pygame.K_a]) * vel
+        action[0] += (keys[pygame.K_s] - keys[pygame.K_w]) * vel
 
         #actions = []
         #rewards = []
