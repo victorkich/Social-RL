@@ -255,28 +255,33 @@ class Agent:
         self.memory.add(state, action, reward, next_state)
         if len(self.memory) > self.batch_size:
             experiences = self.memory.sample()
-            self.learn(experiences, self.gamma)
+            self.learn(experiences)
 
-    def learn(self, experiences, gamma):
+    def learn(self, experiences):
         states, actions, rewards, next_states = experiences
+
+        states = torch.from_numpy(states).float().to(device)
+        actions = torch.from_numpy(actions).float().to(device)
+        rewards = torch.from_numpy(rewards).float().to(device)
+        next_states = torch.from_numpy(next_states).float().to(device)
 
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
         next_action, log_pis_next = self.actor_local.evaluate(next_states)
 
-        Q_target1_next = self.critic1_target(next_states.to(device), next_action.to(device))
-        Q_target2_next = self.critic2_target(next_states.to(device), next_action.to(device))
+        Q_target1_next = self.critic1_target(next_states, next_action)
+        Q_target2_next = self.critic2_target(next_states, next_action)
         print("QS:", Q_target1_next.shape, Q_target2_next.shape)
 
         # take the mean of both critics for updating
         Q_target_next = torch.min(Q_target1_next, Q_target2_next)
 
-        Q_targets = rewards.cpu().detach().numpy() + (gamma * (Q_target_next.cpu().numpy() - self.alpha * log_pis_next.cpu().detach().numpy()))
+        Q_targets = rewards + (self.gamma * (Q_target_next - self.alpha * log_pis_next))
         print(Q_target_next.shape, len(rewards), len(log_pis_next))
 
         # Compute critic loss
-        Q_1 = self.critic1(states.to(device), actions.to(device)).cpu()
-        Q_2 = self.critic2(states.to(device), actions.to(device)).cpu()
+        Q_1 = self.critic1(states, actions)
+        Q_2 = self.critic2(states, actions)
         print('Q_1:', Q_1.shape, 'Q_TARGETS:', Q_targets.shape)
         critic1_loss = 0.5 * F.mse_loss(Q_1, Q_targets.detach())
         critic2_loss = 0.5 * F.mse_loss(Q_2, Q_targets.detach())
