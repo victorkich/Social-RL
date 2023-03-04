@@ -166,7 +166,8 @@ class Environment:
         surface = pygame.Surface((100, 200))
         data = pygame.image.tobytes(surface, 'RGBA')
         state = Image.frombytes('RGBA', (100, 200), data)
-        return state.to_numpy()
+        state = np.asarray(state)
+        return state
 
     def grab_event(self, agent):
         pass
