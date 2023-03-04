@@ -11,6 +11,7 @@ import pygame
 import random
 import torch
 import time
+import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using: ", device)
@@ -166,6 +167,8 @@ class Environment:
         surface = pygame.Surface((100, 200))
         data = pygame.image.tobytes(surface, 'RGBA')
         state = Image.frombytes('RGBA', (100, 200), data)
+        plt.impglot(state)
+        plt.show()
         state = np.asarray(state)
         return state
 
@@ -351,7 +354,7 @@ while running:
             reward = agent.step(action, env)
             actions.append(action)
             rewards.append(reward)
-        env.render(agents)
+        env.render(agents, render=can_render)
         next_state = env.get_state()
 
         for agent, action, reward in zip(agents, actions, rewards):
