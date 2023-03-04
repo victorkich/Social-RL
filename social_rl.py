@@ -358,13 +358,16 @@ while running:
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
-                    action[0] -= 20
+                    action[1] -= 10
                 if event.key == pygame.K_s:
-                    action[0] += 20
+                    action[1] += 10
                 if event.key == pygame.K_a:
-                    action[1] -= 20
+                    action[0] -= 10
                 if event.key == pygame.K_d:
-                    action[1] += 20
+                    action[0] += 10
+                if event.key == pygame.K_q:
+                    status_bar.update(status='Ending')
+                    running = False
 
         #actions = []
         #rewards = []
