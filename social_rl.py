@@ -166,6 +166,7 @@ class Environment:
         surface = pygame.Surface.copy(self.scr)
         data = pygame.image.tobytes(surface, 'RGBA')
         state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
+        state = state.resize((200, 200))
         state = np.asarray(state)[:, :, :3]
         plt.imshow(state)
         plt.show()
