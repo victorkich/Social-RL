@@ -327,7 +327,7 @@ steps = 0
 state = env.get_state()
 while running:
     ticks.update(0)
-    can_render = False
+    can_render = True
     time_2 = time.perf_counter()
     passed = time_2 - time_1
     unprocessed += passed
