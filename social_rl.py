@@ -357,13 +357,13 @@ while running:
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.W_DOWN:
+                if event.key == pygame.K_w:
                     action[0] -= 20
-                if event.key == pygame.S_DOWN:
+                if event.key == pygame.K_s:
                     action[0] += 20
-                if event.key == pygame.A_DOWN:
+                if event.key == pygame.K_a:
                     action[1] -= 20
-                if event.key == pygame.D_DOWN:
+                if event.key == pygame.K_d:
                     action[1] += 20
 
         #actions = []
