@@ -266,9 +266,10 @@ class Agent:
 
         Q_target1_next = self.critic1_target(next_states.to(device), next_action.to(device))
         Q_target2_next = self.critic2_target(next_states.to(device), next_action.to(device))
+        print("QS:", Q_target1_next.shape, Q_target2_next.shape)
 
         # take the mean of both critics for updating
-        Q_target_next = torch.min(Q_target1_next, Q_target2_next).squeeze(0)
+        Q_target_next = torch.min(Q_target1_next, Q_target2_next)
 
         Q_targets = rewards.cpu() + (gamma * (Q_target_next.cpu() - self.alpha * log_pis_next.cpu()))
         print(Q_target_next.shape, len(rewards), len(log_pis_next))
