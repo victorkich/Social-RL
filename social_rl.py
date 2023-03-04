@@ -136,7 +136,7 @@ class Environment:
         self.y_locks = [400, 150, 650, 400]
         self.lock_radius = 30
 
-        self.scr = pygame.display.set_mode((self.x_boundary, self..y_boundary))
+        self.scr = pygame.display.set_mode((self.x_boundary, self.y_boundary))
         pygame.display.set_caption('Social RL')
 
     def render(self, agents, render=True):
