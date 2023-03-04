@@ -269,7 +269,7 @@ class Agent:
 
         # take the mean of both critics for updating
         Q_target_next = torch.min(Q_target1_next, Q_target2_next)
-        print(Q_target_next.shape, len(rewards), len(log_pis_next), len(gamma), len(self.alpha))
+        print(Q_target_next.shape, len(rewards), len(log_pis_next), len(gamma))
         Q_targets = rewards.cpu() + (gamma * (Q_target_next.cpu() - self.alpha * log_pis_next.cpu()))
 
         # Compute critic loss
