@@ -11,7 +11,6 @@ import pygame
 import random
 import torch
 import time
-import matplotlib.pyplot as plt
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using: ", device)
@@ -80,21 +79,12 @@ class Actor(nn.Module):
         return mu, log_std
 
     def evaluate(self, state, epsilon=1e-6):
-        #batch_mu, batch_log_sigma = self.forward(state)
-        #batch_mu, batch_log_sigma, _ = self.actor(state)
-        #batch_sigma = torch.exp(batch_log_sigma)
-        #dist = Normal(batch_mu, batch_sigma)
-        #z = dist.sample()
-        #action = torch.tanh(z)
-        #log_prob = dist.log_prob(z) - torch.log(1 - action.pow(2) + epsilon)
-
         mu, log_std = self.forward(state)
         std = log_std.exp()
         dist = Normal(0, 1)
         e = dist.sample().to(device)
         action = torch.tanh(mu + e * std)
         log_prob = Normal(mu, std).log_prob(mu + e * std) - torch.log(1 - action.pow(2) + epsilon)
-
         return action, log_prob
 
     def get_action(self, state):
@@ -218,7 +208,7 @@ class Agent:
 
         self.target_entropy = -action_size
         self.alpha = 1
-        self.log_alpha = torch.tensor([0.0], requires_grad=True)
+        self.log_alpha = torch.tensor([0.0])
         self.alpha_optimizer = optim.Adam(params=[self.log_alpha], lr=self.lr)
         self._action_prior = action_prior
 
@@ -354,6 +344,7 @@ while running:
     passed = time_2 - time_1
     unprocessed += passed
     time_1 = time_2
+    action = np.zeros(3)
 
     while unprocessed >= frame_cap:
         unprocessed -= frame_cap
@@ -365,18 +356,29 @@ while running:
                 status_bar.update(status='Ending')
                 running = False
 
-        actions = []
-        rewards = []
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.W:
+                    action[0] -= 20
+                if event.key == pygame.S:
+                    action[0] += 20
+                if event.key == pygame.A:
+                    action[1] -= 20
+                if event.key == pygame.D:
+                    action[1] += 20
 
-        for agent in agents:
-            action = agent.get_action(state)
-            reward = agent.step(action, env)
-            actions.append(action)
-            rewards.append(reward)
+        #actions = []
+        #rewards = []
+        reward = agents[0].step(action, env)
+
+        #for agent in agents:
+        #    action = agent.get_action(state)
+        #    reward = agent.step(action, env)
+        #    actions.append(action)
+        #    rewards.append(reward)
         next_state = env.get_state()
 
-        for agent, action, reward in zip(agents, actions, rewards):
-            agent.optimize(state, action, reward, next_state)
+        #for agent, action, reward in zip(agents, actions, rewards):
+        #    agent.optimize(state, action, reward, next_state)
         ticks.update(1)
         steps += 1
         state = next_state
