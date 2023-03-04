@@ -264,12 +264,12 @@ class Agent:
         # Get predicted next-state actions and Q values from target models
         next_action, log_pis_next = self.actor_local.evaluate(next_states)
 
-        Q_target1_next = self.critic1_target(next_states.to(device), next_action.squeeze(0).to(device))
-        Q_target2_next = self.critic2_target(next_states.to(device), next_action.squeeze(0).to(device))
+        Q_target1_next = self.critic1_target(next_states.to(device), next_action.to(device))
+        Q_target2_next = self.critic2_target(next_states.to(device), next_action.to(device))
 
         # take the mean of both critics for updating
         Q_target_next = torch.min(Q_target1_next, Q_target2_next)
-        Q_targets = rewards.cpu() + (gamma * (Q_target_next.cpu() - self.alpha * log_pis_next.squeeze(0).cpu()))
+        Q_targets = rewards.cpu() + (gamma * (Q_target_next.cpu() - self.alpha * log_pis_next.cpu()))
 
         # Compute critic loss
         Q_1 = self.critic1(states, actions).cpu()
