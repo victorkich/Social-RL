@@ -80,12 +80,20 @@ class Actor(nn.Module):
         return mu, log_std
 
     def evaluate(self, state, epsilon=1e-6):
-        mu, log_std = self.forward(state)
-        std = log_std.exp()
-        dist = Normal(0, 1)
-        e = dist.sample().to(device)
-        action = torch.tanh(mu + e * std)
-        log_prob = Normal(mu, std).log_prob(mu + e * std) - torch.log(1 - action.pow(2) + epsilon)
+        batch_mu, batch_log_sigma = self.forward(state)
+        #batch_mu, batch_log_sigma, _ = self.actor(state)
+        batch_sigma = torch.exp(batch_log_sigma)
+        dist = Normal(batch_mu, batch_sigma)
+        z = dist.sample()
+        action = torch.tanh(z)
+        log_prob = dist.log_prob(z) - torch.log(1 - action.pow(2) + min_Val)
+
+        #mu, log_std = self.forward(state)
+        #std = log_std.exp()
+        #dist = Normal(0, 1)
+        #e = dist.sample().to(device)
+        #action = torch.tanh(mu + e * std)
+        #log_prob = Normal(mu, std).log_prob(mu + e * std) - torch.log(1 - action.pow(2) + epsilon)
 
         return action, log_prob
 
