@@ -165,11 +165,10 @@ class Environment:
         data = pygame.image.tobytes(surface, 'RGBA')
         state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
         state = np.asarray(state)[:, :, :3]
-        print(state.shape)
-        state = state.reshape((3, self.x_boundary, self.y_boundary))
-        pygame.display.flip()
         plt.imshow(state)
         plt.show()
+        state = state.reshape((3, self.x_boundary, self.y_boundary))
+        pygame.display.flip()
         return state
 
     def grab_event(self, agent):
