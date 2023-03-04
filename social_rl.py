@@ -328,6 +328,7 @@ status_bar = manager.status_bar(status_format=status_format, color='bold_slategr
 ticks = manager.counter(total=max_steps, desc="Training step", unit="ticks", color="red")
 
 steps = 0
+env.render(agents, render=True)
 state = env.get_state()
 while running:
     ticks.update(0)
