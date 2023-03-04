@@ -160,6 +160,7 @@ class Environment:
             pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
 
         for agent in agents:
+            print('Passou')
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
         # pygame.Surface.convert(self.scr)
@@ -168,8 +169,8 @@ class Environment:
         state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
         state = state.resize((200, 200))
         state = np.asarray(state)[:, :, :3]
-        plt.imshow(state)
-        plt.show()
+        # plt.imshow(state)
+        # plt.show()
         state = state.reshape((1, 3, 200, 200))
         pygame.display.flip()
         return state
