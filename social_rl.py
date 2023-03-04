@@ -260,11 +260,6 @@ class Agent:
     def learn(self, experiences):
         states, actions, rewards, next_states = experiences
 
-        states = torch.from_numpy(states).float().to(device)
-        actions = torch.from_numpy(actions).float().to(device)
-        rewards = torch.from_numpy(rewards).float().to(device)
-        next_states = torch.from_numpy(next_states).float().to(device)
-
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
         next_action, log_pis_next = self.actor_local.evaluate(next_states)
