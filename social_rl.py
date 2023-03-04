@@ -161,7 +161,7 @@ class Environment:
             for agent in agents:
                 pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
-            surface = pygame.Surface.copy()
+            surface = pygame.Surface.copy(self.scr)
             state = np.asarray(surface)
             pygame.display.flip()
 
