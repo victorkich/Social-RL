@@ -183,9 +183,9 @@ class Environment:
         surface = pygame.Surface.copy(self.scr)
         data = pygame.image.tobytes(surface, 'RGBA')
         state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
-        state = state.resize((200, 200))
+        state = state.resize((100, 100))
         state = np.asarray(state)[:, :, :3]
-        state = state.reshape((1, 3, 200, 200))
+        state = state.reshape((1, 3, 100, 100))
         pygame.display.flip()
         return state
 
