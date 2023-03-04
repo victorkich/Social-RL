@@ -239,8 +239,8 @@ class Agent:
 
     def step(self, action, env):
         reward = 0
-        self.x += action[0].numpy()
-        self.y += action[1].numpy()
+        self.x += action[0]#.numpy()
+        self.y += action[1]#.numpy()
 
         if action[2] >= 0.5:
             env.grab_event(self)
