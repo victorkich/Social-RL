@@ -269,8 +269,8 @@ class Agent:
 
         # take the mean of both critics for updating
         Q_target_next = torch.min(Q_target1_next, Q_target2_next)
+        Q_targets = rewards.unsqueeze(1).cpu() + (gamma * (Q_target_next.cpu() - self.alpha * log_pis_next.unsqueeze(1).cpu()))
         print(Q_target_next.shape, len(rewards), len(log_pis_next))
-        Q_targets = rewards.cpu() + (gamma * (Q_target_next.cpu() - self.alpha * log_pis_next.cpu()))
 
         # Compute critic loss
         Q_1 = self.critic1(states.to(device), actions.to(device)).cpu()
