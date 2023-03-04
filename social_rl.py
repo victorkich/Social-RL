@@ -140,9 +140,6 @@ class Environment:
         self.scr = pygame.display.set_mode((self.x_boundary, self.y_boundary))
         pygame.display.set_caption('Social RL')
 
-    #def render(self, agents, render=True):
-
-
     def get_state(self):
         for agent in agents:
             if agent.x > self.x_boundary - agent.radius:
@@ -165,7 +162,7 @@ class Environment:
 
         surface = pygame.Surface.copy(self.scr)
         data = pygame.image.tobytes(surface, 'RGBA')
-        state = Image.frombytes('RGBA', self.scr, data)
+        state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
         state = np.asarray(state)
         pygame.display.flip()
         plt.imshow(state)
