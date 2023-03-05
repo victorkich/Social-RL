@@ -85,7 +85,7 @@ class Actor(nn.Module):
         dist = Normal(0, 1)
         e = dist.sample().to(device)
         action = torch.tanh(mu + e * std).cpu()
-        return action[0]
+        return action
 
 
 class Critic(nn.Module):
@@ -316,7 +316,7 @@ class Agent:
 
     def get_action(self, state):
         state = torch.from_numpy(state).float().to(device)
-        action = self.actor_local.get_action(state).detach()#.numpy()
+        action = self.actor_local.get_action(state).detach().numpy()
         return action
 
     def step(self, action, env):
