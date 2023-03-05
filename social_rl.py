@@ -181,10 +181,11 @@ class Environment:
                 c_lock = 140
             elif i == 1 and any(active_locks[[1, 3]]):
                 c_lock = 140
-            elif i == 2 and any(active_locks[[2, 3]]):
+            elif i == 2 and any(active_locks[[1, 3]]):
                 c_lock = 140
-            elif i == 3 and any(active_locks[[0, 2]]):
+            elif i == 3 and any(active_locks[[2, 3]]):
                 c_lock = 140
+
             else:
                 c_lock = 200
             pygame.draw.circle(self.scr, (0, 0, c_lock), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
