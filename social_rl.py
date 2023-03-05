@@ -189,9 +189,7 @@ class Environment:
                 c_lock = 200
             pygame.draw.circle(self.scr, (0, 0, c_lock), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
 
-
         for i in range(4):
-            pygame.draw.circle(self.scr, (0, 0, 200), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
             pygame.draw.circle(self.scr, (0, 200, 0), (self.x_jobs[i], self.y_jobs[i]), self.job_radius)
             pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
 
