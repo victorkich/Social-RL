@@ -468,8 +468,8 @@ while running:
         for i in range(4):
             next_states.append(env.get_state(i))
 
-        for agent, action, reward in zip(agents, actions, rewards):
-            agent.optimize(states, action, reward, next_states)
+        for agent, action, reward, state, next_state in zip(agents, actions, rewards, states, next_states):
+            agent.optimize(state, action, reward, next_state)
 
         ticks.update(1)
         steps += 1
