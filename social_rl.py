@@ -233,6 +233,8 @@ class Environment:
             state.append(angle)
         for i in range(4):
             state.append(self.coins_at_banks[i])
+
+        state = np.array(state)
         return state
 
     def grab_event(self, id):
