@@ -212,9 +212,9 @@ class Environment:
         for i in range(4):
             if self.carried_coins[i] == id + 1:
                 self.carried_coins[i] = False
-                agents[i].grabbed_coin = False
-                self.x_coins[i] = agents[i].x
-                self.y_coins[i] = agents[i].y
+                agents[id].grabbed_coin = False
+                self.x_coins[i] = agents[id].x
+                self.y_coins[i] = agents[id].y
 
     def finish(self):
         pygame.quit()
