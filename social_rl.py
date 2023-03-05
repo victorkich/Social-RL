@@ -175,12 +175,11 @@ class Environment:
         for agent in agents:
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
-
         for i in range(4):
-            if not self.carried_coins[i]:
-                pygame.draw.circle(self.scr, (255, 255, 255), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
-            else:
-                pygame.draw.circle(self.scr, (255, 255, 255), (agents[i].x, agents[i].y), self.coin_radius)
+            if self.carried_coins[i]:
+                self.x_coins[i] = agents[self.carried_coins[i] - 1].x
+                self.y_coins[i] = agents[self.carried_coins[i] - 1].y
+            pygame.draw.circle(self.scr, (255, 255, 255), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
 
             for j in range(4):
                 if np.sqrt(abs(self.x_banks[i] - self.x_coins[j])**2 + abs(self.y_banks[i] - self.y_coins[j])**2) < (self.coin_radius + self.bank_radius):
@@ -190,6 +189,7 @@ class Environment:
                         self.x_coins[j] = self.x_jobs[j]
                         self.y_coins[j] = self.y_jobs[j]
 
+        for i in range(4):
             if self.coins_at_banks[i]:
                 pygame.draw.circle(self.scr, (255, 255, 255), (self.x_banks[i], self.y_banks[i]), self.coin_radius)
 
@@ -205,7 +205,7 @@ class Environment:
     def grab_event(self, id):
         for i in range(4):
             if np.sqrt(abs(agents[id].x - self.x_coins[i])**2 + abs(agents[id].y - self.y_coins[i])**2) < (self.coin_radius + agents[id].radius):
-                self.carried_coins[i] = True
+                self.carried_coins[i] = id + 1
                 agents[id].grabbed_coin = True
 
     def release_event(self, id):
