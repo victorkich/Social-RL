@@ -416,3 +416,4 @@ while running:
         ticks.update(1)
         steps += 1
         state = next_state
+        print('Coins:', env.coins_at_banks)
