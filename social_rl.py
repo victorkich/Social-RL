@@ -166,7 +166,6 @@ class Environment:
                     self.active_locks[i] = True
 
         active_locks = np.array(self.active_locks)
-        print(active_locks)
         for i in range(4):
             if i == 0 and any(active_locks[[0, 1]]):
                 c_lock = 140
@@ -458,7 +457,6 @@ while running:
 
         for agent, state in zip(agents, states):
             action = agent.get_action(state)
-            print('Action:', action)
             reward = agent.step(action, env)
             actions.append(action)
             rewards.append(reward)
