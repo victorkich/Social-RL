@@ -319,7 +319,6 @@ class Agent:
         return action
 
     def step(self, action, env):
-        reward = 0
         self.x += action[0]
         self.y += action[1]
 
@@ -328,6 +327,7 @@ class Agent:
         elif action[2] <= -0.5:
             env.release_event(self.id)
 
+        reward = 0.1 * self.coins
         return reward
 
     def optimize(self, state, action, reward, next_state):
