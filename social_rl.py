@@ -171,13 +171,15 @@ class Environment:
             pygame.draw.circle(self.scr, (0, 0, 200), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
             pygame.draw.circle(self.scr, (0, 200, 0), (self.x_jobs[i], self.y_jobs[i]), self.job_radius)
             pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
+
+        for agent in agents:
+            pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
+
+        for i in range(4):
             if not self.carried_coins[i]:
                 pygame.draw.circle(self.scr, (255, 255, 255), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
             else:
                 pygame.draw.circle(self.scr, (255, 255, 255), (agents[i].x, agents[i].y), self.coin_radius)
-
-        for agent in agents:
-            pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
         # pygame.Surface.convert(self.scr)
         surface = pygame.Surface.copy(self.scr)
