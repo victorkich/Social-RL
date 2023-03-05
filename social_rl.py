@@ -182,7 +182,7 @@ class Environment:
                 c_lock = 140
             elif i == 1 and any(active_locks[[1, 2]]):
                 c_lock = 140
-            elif i == 2 and any(active_locks[[, 3]]):
+            elif i == 2 and any(active_locks[[0 , 3]]):
                 c_lock = 140
             elif i == 3 and any(active_locks[[2, 3]]):
                 c_lock = 140
