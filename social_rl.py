@@ -210,7 +210,7 @@ class Environment:
 
     def release_event(self, id):
         for i in range(4):
-            if self.carried_coins[i]:
+            if self.carried_coins[i] == id + 1:
                 self.carried_coins[id] = False
                 agents[id].grabbed_coin = False
                 self.x_coins[id] = agents[id].x
