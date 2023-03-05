@@ -174,7 +174,7 @@ class Environment:
             if not self.carried_coins[i]:
                 pygame.draw.circle(self.scr, (255, 255, 255), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
             else:
-                pygame.draw.circle(self.scr, (255, 255, 255), (agents[i].x_coin, agents[i].y_coin), self.coin_radius)
+                pygame.draw.circle(self.scr, (255, 255, 255), (agents[i].x, agents[i].y), self.coin_radius)
 
         for agent in agents:
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
@@ -214,10 +214,7 @@ class Agent:
         self.gamma = 0.99
         self.tau = 1e-2
         self.memory = int(2e5)
-
         self.grabbed_coin = False
-        self.x_coin = x_start
-        self.y_coin = y_start
 
         self.state_size = state_size
         self.action_size = action_size
