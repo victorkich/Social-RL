@@ -184,10 +184,10 @@ class Environment:
             for j in range(4):
                 if np.sqrt(abs(self.x_banks[i] - self.x_coins[j])**2 + abs(self.y_banks[i] - self.y_coins[j])**2) < (self.coin_radius + self.bank_radius):
                     if not self.carried_coins[j]:
-                        self.coins_at_banks[j] += 1
-                        agents[i].coins += 1
-                        self.x_coins[j] = self.x_jobs[j]
-                        self.y_coins[j] = self.y_jobs[j]
+                        self.coins_at_banks[self.carried_coins[j]-1] += 1
+                        agents[self.carried_coins[j]-1].coins += 1
+                        self.x_coins[self.carried_coins[j]-1] = self.x_jobs[self.carried_coins[j]-1]
+                        self.y_coins[self.carried_coins[j]-1] = self.y_jobs[self.carried_coins[j]-1]
 
         for i in range(4):
             if self.coins_at_banks[i]:
