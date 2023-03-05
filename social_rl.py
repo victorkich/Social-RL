@@ -417,7 +417,10 @@ status_bar = manager.status_bar(status_format=status_format, color='bold_slategr
 ticks = manager.counter(total=max_steps, desc="Training step", unit="ticks", color="red")
 
 steps = 0
-state = env.get_state()
+env.render()
+states = []
+for i in range(4):
+    states.append(env.get_state(i))
 while running:
     ticks.update(0)
     can_render = False
@@ -442,25 +445,30 @@ while running:
                     status_bar.update(status='Ending')
                     running = False
 
-        keys = pygame.key.get_pressed()
-        action[0] += (keys[pygame.K_d] - keys[pygame.K_a]) * vel
-        action[1] += (keys[pygame.K_s] - keys[pygame.K_w]) * vel
-        action[2] = keys[pygame.K_e] - keys[pygame.K_r]
+        #keys = pygame.key.get_pressed()
+        #action[0] += (keys[pygame.K_d] - keys[pygame.K_a]) * vel
+        #action[1] += (keys[pygame.K_s] - keys[pygame.K_w]) * vel
+        #action[2] = keys[pygame.K_e] - keys[pygame.K_r]
 
-        #actions = []
-        #rewards = []
-        reward = agents[0].step(action, env)
+        actions = []
+        rewards = []
+        #reward = agents[0].step(action, env)
 
-        #for agent in agents:
-        #    action = agent.get_action(state)
-        #    reward = agent.step(action, env)
-        #    actions.append(action)
-        #    rewards.append(reward)
-        next_state = env.get_state()
+        for agent, state in zip(agents, states):
+            action = agent.get_action(state)
+            reward = agent.step(action, env)
+            actions.append(action)
+            rewards.append(reward)
 
-        #for agent, action, reward in zip(agents, actions, rewards):
-        #    agent.optimize(state, action, reward, next_state)
+        env.render()
+        next_states = []
+        for i in range(4):
+            next_states.append(env.get_state(i))
+
+        for agent, action, reward in zip(agents, actions, rewards):
+            agent.optimize(states, action, reward, next_states)
+
         ticks.update(1)
         steps += 1
-        state = next_state
+        states = next_states
         print('Coins:', env.coins_at_banks)
