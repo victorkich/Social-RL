@@ -458,6 +458,7 @@ while running:
 
         for agent, state in zip(agents, states):
             action = agent.get_action(state)
+            print('Action:', action)
             reward = agent.step(action, env)
             actions.append(action)
             rewards.append(reward)
