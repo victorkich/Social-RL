@@ -290,7 +290,7 @@ class Agent:
 
         self.target_entropy = -action_size
         self.alpha = 1
-        self.log_alpha = torch.tensor([0.0])
+        self.log_alpha = torch.tensor([0.0], requires_grad=True)
         self.alpha_optimizer = optim.Adam(params=[self.log_alpha], lr=self.lr)
         self._action_prior = action_prior
 
