@@ -77,6 +77,7 @@ class Actor(nn.Module):
         e = dist.sample().to(device)
         action = torch.tanh(mu + e * std)
         log_prob = Normal(mu, std).log_prob(mu + e * std) - torch.log(1 - action.pow(2) + epsilon)
+        print(action)
         return action, log_prob
 
     def get_action(self, state):
