@@ -209,11 +209,12 @@ class Environment:
                 agents[id].grabbed_coin = True
 
     def release_event(self, id):
-        if self.carried_coins[id]:
-            self.carried_coins[id] = False
-            agents[id].grabbed_coin = False
-            self.x_coins[id] = agents[id].x
-            self.y_coins[id] = agents[id].y
+        for i in range(4):
+            if self.carried_coins[i]:
+                self.carried_coins[id] = False
+                agents[id].grabbed_coin = False
+                self.x_coins[id] = agents[id].x
+                self.y_coins[id] = agents[id].y
 
     def finish(self):
         pygame.quit()
