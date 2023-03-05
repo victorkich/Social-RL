@@ -210,7 +210,7 @@ class Environment:
 
         for i in range(4):
             if not i == id:
-                if np.sqrt(abs(agents[id].x - self.x_banks[i]) ** 2 + abs(agents[id].y - self.x_banks[i]) ** 2) < (self.bank_radius + agents[id].radius):
+                if np.sqrt(abs(agents[id].x - self.x_banks[i]) ** 2 + abs(agents[id].y - self.y_banks[i]) ** 2) < self.bank_radius:
                     agents[id].stealing_bank += 1
                     print(agents[id].stealing_bank)
                     if agents[id].stealing_bank >= 10:
