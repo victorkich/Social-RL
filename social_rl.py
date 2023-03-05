@@ -186,8 +186,8 @@ class Environment:
                     if not self.carried_coins[j]:
                         self.coins_at_banks[i] += 1
                         agents[i].coins += 1
-                        self.x_coins[j] = self.x_jobs[i]
-                        self.y_coins[j] = self.y_jobs[i]
+                        self.x_coins[j] = self.x_jobs[j]
+                        self.y_coins[j] = self.y_jobs[j]
 
         for i in range(4):
             if self.coins_at_banks[i]:
