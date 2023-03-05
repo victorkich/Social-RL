@@ -4,13 +4,13 @@ from collections import namedtuple, deque
 import torch.nn.functional as F
 import torch.optim as optim
 import torch.nn as nn
-from PIL import Image
 import numpy as np
 import enlighten
 import pygame
 import random
 import torch
 import time
+import math
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using: ", device)
@@ -53,25 +53,17 @@ class Actor(nn.Module):
         self.log_std_min = log_std_min
         self.log_std_max = log_std_max
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5), stride=2, padding=0)
-        self.conv2 = nn.Conv2d(in_channels=6, out_channels=3, kernel_size=(5, 5), stride=2, padding=0)
-        self.conv3 = nn.Conv2d(in_channels=3, out_channels=1, kernel_size=(5, 5), stride=2, padding=0)
-
-        self.flatten = nn.Flatten()
-
         self.fc1 = nn.Linear(state_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, hidden_size)
 
         self.mu = nn.Linear(hidden_size, action_size)
         self.log_std_linear = nn.Linear(hidden_size, action_size)
 
     def forward(self, state):
-        x = F.relu(self.conv1(state))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = self.flatten(x)
-        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
         mu = self.mu(x)
 
         log_std = self.log_std_linear(x)
@@ -101,12 +93,6 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
         self.seed = torch.manual_seed(seed)
 
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=(5, 5), stride=2, padding=0)
-        self.conv2 = nn.Conv2d(in_channels=6, out_channels=3, kernel_size=(5, 5), stride=2, padding=0)
-        self.conv3 = nn.Conv2d(in_channels=3, out_channels=1, kernel_size=(5, 5), stride=2, padding=0)
-
-        self.flatten = nn.Flatten()
-
         self.fc1 = nn.Linear(state_size + action_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, action_size)
@@ -118,14 +104,18 @@ class Critic(nn.Module):
         self.fc3.weight.data.uniform_(-3e-3, 3e-3)
 
     def forward(self, state, action):
-        x = F.relu(self.conv1(state))
-        x = F.relu(self.conv2(x))
-        x = F.relu(self.conv3(x))
-        x = self.flatten(x)
-        x = torch.cat((x, action), dim=1)
+        x = torch.cat((state, action), dim=1)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         return self.fc3(x)
+
+
+def distance_and_angle(w1, h1, w2, h2):
+    h = abs(h1 - h2)
+    w = abs(w1 - w2)
+    d = np.sqrt(h ** 2 + w ** 2)
+    angle = math.atan2(h, w)
+    return d, angle
 
 
 class Environment:
@@ -156,7 +146,7 @@ class Environment:
         self.scr = pygame.display.set_mode((self.x_boundary, self.y_boundary))
         pygame.display.set_caption('Social RL')
 
-    def get_state(self):
+    def render(self):
         for agent in agents:
             if agent.x > self.x_boundary - agent.radius:
                 agent.x = self.x_boundary - agent.radius
@@ -216,14 +206,33 @@ class Environment:
             if self.coins_at_banks[i]:
                 pygame.draw.circle(self.scr, (255, 255, 255), (self.x_banks[i], self.y_banks[i]), self.coin_radius)
 
-        # surface = pygame.Surface.copy(self.scr)
-        # data = pygame.image.tobytes(surface, 'RGBA')
-        # state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
-        # state = state.resize((100, 100))
-        # state = np.asarray(state)[:, :, :3]
-        # state = state.reshape((1, 3, 100, 100))
-        state = None
         pygame.display.flip()
+
+    def get_state(self, id):
+        state = []
+        for i in range(4):
+            if not id == i:
+                d, angle = distance_and_angle(agents[id].x, agents[id].y, agents[i].x, agents[i].y)
+                state.append(d)
+                state.append(angle)
+        for i in range(4):
+            d, angle = distance_and_angle(agents[id].x, agents[id].y, self.x_jobs[i], self.y_jobs[i])
+            state.append(d)
+            state.append(angle)
+        for i in range(4):
+            d, angle = distance_and_angle(agents[id].x, agents[id].y, self.x_banks[i], self.y_banks[i])
+            state.append(d)
+            state.append(angle)
+        for i in range(4):
+            d, angle = distance_and_angle(agents[id].x, agents[id].y, self.x_locks[i], self.y_locks[i])
+            state.append(d)
+            state.append(angle)
+        for i in range(4):
+            d, angle = distance_and_angle(agents[id].x, agents[id].y, self.x_coins[i], self.y_coins[i])
+            state.append(d)
+            state.append(angle)
+        for i in range(4):
+            state.append(self.coins_at_banks[i])
         return state
 
     def grab_event(self, id):
@@ -236,7 +245,6 @@ class Environment:
             if not i == id:
                 if np.sqrt(abs(agents[id].x - self.x_banks[i]) ** 2 + abs(agents[id].y - self.y_banks[i]) ** 2) < self.bank_radius:
                     agents[id].stealing_bank += 1
-                    print(agents[id].stealing_bank)
                     if agents[id].stealing_bank >= 10:
                         if self.coins_at_banks[i] > 0:
                             self.coins_at_banks[id] += 1
