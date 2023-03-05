@@ -182,7 +182,7 @@ class Environment:
             pygame.draw.circle(self.scr, (255, 255, 255), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
 
             for j in range(4):
-                if np.sqrt(abs(self.x_banks[i] - self.x_coins[j])**2 + abs(self.y_banks[i] - self.y_coins[j])**2) < (self.coin_radius + self.bank_radius):
+                if np.sqrt(abs(self.x_banks[i] - self.x_coins[j]) ** 2 + abs(self.y_banks[i] - self.y_coins[j]) ** 2) < (self.coin_radius + self.bank_radius):
                     if not self.carried_coins[j]:
                         self.coins_at_banks[i] += 1
                         agents[i].coins += 1
@@ -204,13 +204,13 @@ class Environment:
 
     def grab_event(self, id):
         for i in range(4):
-            if np.sqrt(abs(agents[id].x - self.x_coins[i])**2 + abs(agents[id].y - self.y_coins[i])**2) < (self.coin_radius + agents[id].radius):
+            if np.sqrt(abs(agents[id].x - self.x_coins[i]) ** 2 + abs(agents[id].y - self.y_coins[i]) ** 2) < (self.coin_radius + agents[id].radius):
                 self.carried_coins[i] = id + 1
                 agents[id].grabbed_coin = True
 
         for i in range(4):
-            if np.sqrt(abs(agents[id].x - self.x_banks[i]) ** 2 + abs(agents[id].y - self.x_banks[i]) ** 2) < self.bank_radius:
-                if not i == id:
+            if not i == id:
+                if np.sqrt(abs(agents[id].x - self.x_banks[i]) ** 2 + abs(agents[id].y - self.x_banks[i]) ** 2) < (self.bank_radius + agents[id].radius):
                     agents[id].stealing_bank += 1
                     print(agents[id].stealing_bank)
                     if agents[id].stealing_bank >= 10:
