@@ -199,6 +199,8 @@ class Environment:
     def release_event(self, id):
         self.carried_coins[id] = False
         agents[id].grabbed_coin = False
+        self.x_coins[id] = agents[id].x
+        self.y_coins[id] = agents[id].y
 
     def finish(self):
         pygame.quit()
