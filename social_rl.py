@@ -144,6 +144,7 @@ class Environment:
 
         self.x_locks = [150, 400, 400, 650]
         self.y_locks = [400, 150, 650, 400]
+        self.active_locks = [False, False, False, False]
         self.lock_radius = 30
 
         self.coin_radius = 10
@@ -167,10 +168,30 @@ class Environment:
                 agent.y = agent.radius
 
         self.scr.fill((0, 0, 0))
+
+        self.active_locks = [False, False, False, False]
+        for i in range(4):
+            for j in range(4):
+                if np.sqrt(abs(agents[j].x - self.x_locks[i]) ** 2 + abs(agents[j].y - self.y_locks[i]) ** 2) < self.lock_radius:
+                    self.active_locks[i] = True
+
+        active_locks = np.array(self.active_locks)
+        for i in range(4):
+            if i == 0 and any(active_locks == [0, 1]):
+                c_lock = 140
+            elif i == 1 and any(active_locks == [1, 2]):
+                c_lock = 140
+            elif i == 2 and any(active_locks == [2, 3]):
+                c_lock = 140
+            elif i == 3 and any(active_locks == [1, 3]):
+                c_lock = 140
+            else:
+                c_lock = 200
+            pygame.draw.circle(self.scr, (c_lock, c_lock, c_lock), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
+
         for i in range(4):
             pygame.draw.circle(self.scr, (0, 0, 200), (self.x_banks[i], self.y_banks[i]), self.bank_radius)
             pygame.draw.circle(self.scr, (0, 200, 0), (self.x_jobs[i], self.y_jobs[i]), self.job_radius)
-            pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
 
         for agent in agents:
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
@@ -193,12 +214,13 @@ class Environment:
             if self.coins_at_banks[i]:
                 pygame.draw.circle(self.scr, (255, 255, 255), (self.x_banks[i], self.y_banks[i]), self.coin_radius)
 
-        surface = pygame.Surface.copy(self.scr)
-        data = pygame.image.tobytes(surface, 'RGBA')
-        state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
-        state = state.resize((100, 100))
-        state = np.asarray(state)[:, :, :3]
-        state = state.reshape((1, 3, 100, 100))
+        # surface = pygame.Surface.copy(self.scr)
+        # data = pygame.image.tobytes(surface, 'RGBA')
+        # state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
+        # state = state.resize((100, 100))
+        # state = np.asarray(state)[:, :, :3]
+        # state = state.reshape((1, 3, 100, 100))
+        state = None
         pygame.display.flip()
         return state
 
