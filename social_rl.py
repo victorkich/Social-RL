@@ -177,13 +177,13 @@ class Environment:
 
         active_locks = np.array(self.active_locks)
         for i in range(4):
-            if i == 0 and any(active_locks[[0, 2]]):
+            if i == 0 and any(active_locks[[0, 1]]):
                 c_lock = 140
-            elif i == 1 and any(active_locks[[0, 1]]):
+            elif i == 1 and any(active_locks[[1, 3]]):
                 c_lock = 140
-            elif i == 2 and any(active_locks[[1, 3]]):
+            elif i == 2 and any(active_locks[[2, 3]]):
                 c_lock = 140
-            elif i == 3 and any(active_locks[[2, 3]]):
+            elif i == 3 and any(active_locks[[0, 2]]):
                 c_lock = 140
             else:
                 c_lock = 200
