@@ -208,6 +208,19 @@ class Environment:
                 self.carried_coins[i] = id + 1
                 agents[id].grabbed_coin = True
 
+        for i in range(4):
+            if np.sqrt(abs(agents[id].x - self.x_banks[i]) ** 2 + abs(agents[id].y - self.x_banks[i]) ** 2) < self.bank_radius:
+                if not i == id:
+                    agents[id].stealing_bank += 1
+                    if agents[id].stealing_bank >= 10:
+                        if self.coins_at_banks[i] > 0:
+                            self.coins_at_banks[id] += 1
+                            self.coins_at_banks[i] -= 1
+                            agents[id].coins += 1
+                            agents[i].coins -= 1
+                    return
+        agents[id].stealing_bank = 0
+
     def release_event(self, id):
         for i in range(4):
             if self.carried_coins[i] == id + 1:
@@ -234,6 +247,7 @@ class Agent:
         self.memory = int(2e5)
         self.grabbed_coin = False
         self.coins = 0
+        self.stealing_bank = 0
 
         self.state_size = state_size
         self.action_size = action_size
