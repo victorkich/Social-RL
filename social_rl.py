@@ -172,9 +172,9 @@ class Environment:
             pygame.draw.circle(self.scr, (0, 200, 0), (self.x_jobs[i], self.y_jobs[i]), self.job_radius)
             pygame.draw.circle(self.scr, (200, 200, 200), (self.x_locks[i], self.y_locks[i]), self.lock_radius)
             if not self.carried_coins[i]:
-                pygame.draw.circle(self.scr, (0, 0, 0), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
+                pygame.draw.circle(self.scr, (255, 255, 255), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
             else:
-                pygame.draw.circle(self.scr, (0, 0, 0), (agents[i].x_coin, agents[i].y_coin), self.coin_radius)
+                pygame.draw.circle(self.scr, (255, 255, 255), (agents[i].x_coin, agents[i].y_coin), self.coin_radius)
 
         for agent in agents:
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
@@ -189,11 +189,14 @@ class Environment:
         pygame.display.flip()
         return state
 
-    def grab_event(self, agent):
-        pass
+    def grab_event(self, id):
+        if np.sqrt(abs(agents[id].x - self.x_coins[id])**2 + abs(agents[id].y - self.y_coins[id])**2) < (self.coin_radius + agents[id].radius):
+            self.carried_coins[id] = True
+            agents[id].grabbed_coin = True
 
-    def release_event(self, agent):
-        pass
+    def release_event(self, id):
+        self.carried_coins[id] = False
+        agents[id].grabbed_coin = False
 
     def finish(self):
         pygame.quit()
@@ -248,18 +251,18 @@ class Agent:
 
     def get_action(self, state):
         state = torch.from_numpy(state).float().to(device)
-        action = self.actor_local.get_action(state).detach()
+        action = self.actor_local.get_action(state).detach().numpy()
         return action
 
     def step(self, action, env):
         reward = 0
-        self.x += action[0]#.numpy()
-        self.y += action[1]#.numpy()
+        self.x += action[0]
+        self.y += action[1]
 
         if action[2] >= 0.5:
-            env.grab_event(self)
+            env.grab_event(self.id)
         elif action[2] <= -0.5:
-            env.release_event(self)
+            env.release_event(self.id)
 
         return reward
 
@@ -343,7 +346,7 @@ max_steps = 1000000
 frame_cap = 1.0 / 60
 time_1 = time.perf_counter()
 unprocessed = 0
-vel = 10
+vel = 5
 
 manager = enlighten.get_manager()
 status_format = '{program}{fill}Social RL: {agents}{fill} Status {status}'
@@ -379,6 +382,7 @@ while running:
         keys = pygame.key.get_pressed()
         action[0] += (keys[pygame.K_d] - keys[pygame.K_a]) * vel
         action[1] += (keys[pygame.K_s] - keys[pygame.K_w]) * vel
+        action[2] += keys[pygame.K_e]
 
         #actions = []
         #rewards = []
