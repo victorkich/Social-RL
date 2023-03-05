@@ -175,13 +175,24 @@ class Environment:
         for agent in agents:
             pygame.draw.circle(self.scr, agent.color, (agent.x, agent.y), agent.radius)
 
+
         for i in range(4):
             if not self.carried_coins[i]:
                 pygame.draw.circle(self.scr, (255, 255, 255), (self.x_coins[i], self.y_coins[i]), self.coin_radius)
             else:
                 pygame.draw.circle(self.scr, (255, 255, 255), (agents[i].x, agents[i].y), self.coin_radius)
 
-        # pygame.Surface.convert(self.scr)
+            for j in range(4):
+                if np.sqrt(abs(self.x_banks[i] - self.x_coins[j])**2 + abs(self.y_banks[i] - self.y_coins[j])**2) < (self.coin_radius + self.bank_radius):
+                    if not self.carried_coins[j]:
+                        self.coins_at_banks[j] += 1
+                        agents[i].coins += 1
+                        self.x_coins[j] = self.x_jobs[j]
+                        self.y_coins[j] = self.y_jobs[j]
+
+            if self.coins_at_banks[i]:
+                pygame.draw.circle(self.scr, (255, 255, 255), (self.x_banks[i], self.y_banks[i]), self.coin_radius)
+
         surface = pygame.Surface.copy(self.scr)
         data = pygame.image.tobytes(surface, 'RGBA')
         state = Image.frombytes('RGBA', (self.x_boundary, self.y_boundary), data)
@@ -192,9 +203,10 @@ class Environment:
         return state
 
     def grab_event(self, id):
-        if np.sqrt(abs(agents[id].x - self.x_coins[id])**2 + abs(agents[id].y - self.y_coins[id])**2) < (self.coin_radius + agents[id].radius):
-            self.carried_coins[id] = True
-            agents[id].grabbed_coin = True
+        for i in range(4):
+            if np.sqrt(abs(agents[id].x - self.x_coins[i])**2 + abs(agents[id].y - self.y_coins[i])**2) < (self.coin_radius + agents[id].radius):
+                self.carried_coins[i] = True
+                agents[id].grabbed_coin = True
 
     def release_event(self, id):
         if self.carried_coins[id]:
@@ -220,6 +232,7 @@ class Agent:
         self.tau = 1e-2
         self.memory = int(2e5)
         self.grabbed_coin = False
+        self.coins = 0
 
         self.state_size = state_size
         self.action_size = action_size
