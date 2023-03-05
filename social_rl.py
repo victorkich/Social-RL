@@ -77,7 +77,6 @@ class Actor(nn.Module):
         e = dist.sample().to(device)
         action = torch.tanh(mu + e * std)
         log_prob = Normal(mu, std).log_prob(mu + e * std) - torch.log(1 - action.pow(2) + epsilon)
-        print(action)
         return action, log_prob
 
     def get_action(self, state):
@@ -316,7 +315,8 @@ class Agent:
 
     def get_action(self, state):
         state = torch.from_numpy(state).float().to(device)
-        action, _ = self.actor_local.evaluate(state).cpu().detach().numpy()
+        action, _ = self.actor_local.evaluate(state)
+        action = action.cpu().detach().numpy()
         return action
 
     def step(self, action, env):
