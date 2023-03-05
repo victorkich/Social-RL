@@ -315,7 +315,7 @@ class Agent:
 
     def get_action(self, state):
         state = torch.from_numpy(state).float().to(device)
-        action, _ = self.actor_local.evaluate(state).detach().numpy()
+        action, _ = self.actor_local.evaluate(state).cpu().detach().numpy()
         return action
 
     def step(self, action, env):
