@@ -29,21 +29,20 @@ def import_data(N, M):
 
   for file in filelist:
     try:
-        new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
-        new_data_resized = np.array([resize(img, (64, 64, 3)) for img in new_data])  # Redimensiona as imagens
-        data[idx:(idx + M), :, :, :] = new_data_resized
+      new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
+      new_data_resized = np.array([resize(img, (64, 64, 3)) for img in new_data])  # Redimensiona as imagens
+      data[idx:(idx + M), :, :, :] = new_data_resized
 
-        idx = idx + M
-        file_count += 1
+      idx = idx + M
+      file_count += 1
 
-        if file_count % 50 == 0:
-          print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
-      except Exception as e:
-        print(e)
-        print('Skipped {}...'.format(file))
+      if file_count % 50 == 0:
+        print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
+    except Exception as e:
+      print(e)
+      print('Skipped {}...'.format(file))
 
   print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
-
   return data, N
 
 
