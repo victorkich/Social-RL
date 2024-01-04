@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 from skimage.transform import resize
 import os
+from tqdm import tqdm
 
 DIR_NAME = './data/rollout/'
 
@@ -25,7 +26,7 @@ def import_data(N, M):
   idx = 0
   file_count = 0
 
-  for file in filelist:
+  for file in tqdm(filelist):
     print("File:", file)
     try:
       new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
