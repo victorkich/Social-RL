@@ -27,7 +27,6 @@ def import_data(N, M):
   file_count = 0
 
   for file in tqdm(filelist):
-    print("File:", file)
     try:
       new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
       if new_data.dtype == object:
