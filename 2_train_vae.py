@@ -1,7 +1,6 @@
 from vae.arch import VAE
 import argparse
 import numpy as np
-import config
 import os
 
 DIR_NAME = './data/rollout/'
