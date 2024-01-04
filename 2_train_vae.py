@@ -46,7 +46,6 @@ def import_data(N, M):
   print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
   return data, N
 
-
 def main(args):
   new_model = args.new_model
   N = int(args.N)
@@ -74,7 +73,6 @@ def main(args):
     print('EPOCH ' + str(epoch))
     vae.save_weights('./vae/weights.h5')
     vae.train(data)
-    
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description=('Train VAE'))
@@ -82,7 +80,7 @@ if __name__ == "__main__":
   parser.add_argument('--new_model', action='store_true', help='start a new model from scratch?')
   parser.add_argument('--time_steps', type=int, default=300,
                         help='how many timesteps at start of episode?')
-  parser.add_argument('--epochs', default = 10, help='number of epochs to train for')
+  parser.add_argument('--epochs', default = 1000, help='number of epochs to train for')
   args = parser.parse_args()
 
   main(args)
