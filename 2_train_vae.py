@@ -8,6 +8,7 @@ DIR_NAME = './data/rollout/'
 SCREEN_SIZE_X = 64
 SCREEN_SIZE_Y = 64
 
+from skimage.transform import resize
 
 def import_data(N, M):
   filelist = os.listdir(DIR_NAME)
@@ -26,11 +27,11 @@ def import_data(N, M):
   idx = 0
   file_count = 0
 
-
   for file in filelist:
-      try:
+    try:
         new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
-        data[idx:(idx + M), :, :, :] = new_data
+        new_data_resized = np.array([resize(img, (64, 64, 3)) for img in new_data])  # Redimensiona as imagens
+        data[idx:(idx + M), :, :, :] = new_data_resized
 
         idx = idx + M
         file_count += 1
