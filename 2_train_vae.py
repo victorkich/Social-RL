@@ -30,7 +30,7 @@ def import_data(N, M):
   for file in filelist:
     try:
       new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
-      if new_data.dtype == np.object:
+      if new_data.dtype == object:
           new_data = np.stack(new_data.tolist())
       new_data_resized = np.array([resize(img, (64, 64, 3)) for img in new_data])  # Redimensiona as imagens
       data[idx:(idx + M), :, :, :] = new_data_resized
