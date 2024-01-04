@@ -1,17 +1,13 @@
 from vae.arch import VAE
 import argparse
 import numpy as np
+from skimage.transform import resize
 import os
 
 DIR_NAME = './data/rollout/'
 
 SCREEN_SIZE_X = 64
 SCREEN_SIZE_Y = 64
-
-from skimage.transform import resize
-
-# Supondo que cada arquivo .npz contém 100 observações e você quer carregar N arquivos
-# O tamanho de data deve ser ajustado para (100*N, 64, 64, 3)
 
 def import_data(N, M):
   filelist = os.listdir(DIR_NAME)
@@ -20,35 +16,35 @@ def import_data(N, M):
   length_filelist = len(filelist)
 
   if length_filelist > N:
-      filelist = filelist[:N]
+    filelist = filelist[:N]
 
   if length_filelist < N:
-      N = length_filelist
+    N = length_filelist
 
   data = np.zeros((100 * N, 64, 64, 3), dtype=np.float32)  # Ajuste aqui para 100*N
   idx = 0
   file_count = 0
 
   for file in filelist:
-      try:
-          new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
-          if new_data.dtype == object:
-              new_data = np.stack(new_data.tolist())
-          new_data_resized = np.array([resize(img, (64, 64, 3)) for img in new_data])  # Redimensiona as imagens
-          data[idx:(idx + new_data_resized.shape[0]), :, :, :] = new_data_resized
+    print("File:", file)
+    try:
+      new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
+      if new_data.dtype == object:
+        new_data = np.stack(new_data.tolist())
+      new_data_resized = np.array([resize(img, (64, 64, 3)) for img in new_data])  # Redimensiona as imagens
+      data[idx:(idx + new_data_resized.shape[0]), :, :, :] = new_data_resized
 
-          idx += new_data_resized.shape[0]  # Atualize idx baseado no número de dados carregados
-          file_count += 1
+      idx += new_data_resized.shape[0]  # Atualize idx baseado no número de dados carregados
+      file_count += 1
 
-          if file_count % 50 == 0:
-              print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
-      except Exception as e:
-          print(e)
-          print('Skipped {}...'.format(file))
+      if file_count % 50 == 0:
+        print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
+    except Exception as e:
+      print(e)
+      print('Skipped {}...'.format(file))
 
   print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
   return data, N
-
 
 
 def main(args):
