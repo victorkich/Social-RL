@@ -9,7 +9,7 @@ from tensorflow.keras import backend as K
 
 INPUT_DIM = (64,64,3)
 
-CONV_FILTERS = [32,64,64, 128]
+CONV_FILTERS = [32,64,64,128]
 CONV_KERNEL_SIZES = [4,4,4,4]
 CONV_STRIDES = [2,2,2,2]
 CONV_ACTIVATIONS = ['relu','relu','relu','relu']
@@ -27,7 +27,15 @@ BATCH_SIZE = 100
 LEARNING_RATE = 0.0001
 KL_TOLERANCE = 0.5
 
+print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
 
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+    except RuntimeError as e:
+        print(e)
 
 
 class Sampling(Layer):

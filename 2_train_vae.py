@@ -30,13 +30,13 @@ def import_data(N, M):
 
   for file in filelist:
       try:
-        new_data = np.load(DIR_NAME + file)['obs']
+        new_data = np.load(DIR_NAME + file, allow_pickle=True)['obs']
         data[idx:(idx + M), :, :, :] = new_data
 
         idx = idx + M
         file_count += 1
 
-        if file_count%50==0:
+        if file_count % 50 == 0:
           print('Imported {} / {} ::: Current data size = {} observations'.format(file_count, N, idx))
       except Exception as e:
         print(e)
@@ -48,7 +48,6 @@ def import_data(N, M):
 
 
 def main(args):
-
   new_model = args.new_model
   N = int(args.N)
   M = int(args.time_steps)
@@ -87,4 +86,3 @@ if __name__ == "__main__":
   args = parser.parse_args()
 
   main(args)
-  
