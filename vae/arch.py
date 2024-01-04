@@ -1,5 +1,4 @@
 import numpy as np
-
 import tensorflow as tf
 
 from tensorflow.keras.layers import Input, Conv2D, Flatten, Dense, Conv2DTranspose, Lambda, Reshape, Layer
@@ -29,6 +28,7 @@ KL_TOLERANCE = 0.5
 
 print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
 
+"""
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
@@ -36,7 +36,7 @@ if gpus:
             tf.config.experimental.set_memory_growth(gpu, True)
     except RuntimeError as e:
         print(e)
-
+"""
 
 class Sampling(Layer):
     def call(self, inputs):
@@ -79,7 +79,6 @@ class VAEModel(Model):
         return self.decoder(latent)
 
 
-
 class VAE():
     def __init__(self):
         self.models = self._build()
@@ -106,7 +105,6 @@ class VAE():
 
         vae_z = Sampling(name='z')([vae_z_mean, vae_z_log_var])
         
-
         #### DECODER: 
         vae_z_input = Input(shape=(Z_DIM,), name='z_input')
 
@@ -117,16 +115,13 @@ class VAE():
         vae_d3 = Conv2DTranspose(filters = CONV_T_FILTERS[2], kernel_size = CONV_T_KERNEL_SIZES[2] , strides = CONV_T_STRIDES[2], activation=CONV_T_ACTIVATIONS[2], name='deconv_layer_3')(vae_d2)
         vae_d4 = Conv2DTranspose(filters = CONV_T_FILTERS[3], kernel_size = CONV_T_KERNEL_SIZES[3] , strides = CONV_T_STRIDES[3], activation=CONV_T_ACTIVATIONS[3], name='deconv_layer_4')(vae_d3)
         
-
         #### MODELS
-
-    
         vae_encoder = Model(vae_x, [vae_z_mean, vae_z_log_var, vae_z], name = 'encoder')
         vae_decoder = Model(vae_z_input, vae_d4, name = 'decoder')
 
         vae_full = VAEModel(vae_encoder, vae_decoder, 10000)
 
-        opti = Adam(lr=LEARNING_RATE)
+        opti = Adam(learning_rate=LEARNING_RATE)
         vae_full.compile(optimizer=opti)
         
         return (vae_full,vae_encoder, vae_decoder)
@@ -135,11 +130,7 @@ class VAE():
         self.full_model.load_weights(filepath)
 
     def train(self, data):
-
-        self.full_model.fit(data, data,
-                shuffle=True,
-                epochs=1,
-                batch_size=BATCH_SIZE)
+        self.full_model.fit(data, data, shuffle=True, epochs=1, batch_size=BATCH_SIZE)
         
     def save_weights(self, filepath):
         self.full_model.save_weights(filepath)
