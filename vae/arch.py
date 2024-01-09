@@ -1,49 +1,35 @@
 import numpy as np
 import tensorflow as tf
-
 from tensorflow.keras.layers import Input, Conv2D, Flatten, Dense, Conv2DTranspose, Lambda, Reshape, Layer
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import backend as K
 
-INPUT_DIM = (64,64,3)
-
-CONV_FILTERS = [32,64,64,128]
-CONV_KERNEL_SIZES = [4,4,4,4]
-CONV_STRIDES = [2,2,2,2]
-CONV_ACTIVATIONS = ['relu','relu','relu','relu']
-
-DENSE_SIZE = 1024
-
-CONV_T_FILTERS = [64,64,32,3]
-CONV_T_KERNEL_SIZES = [5,5,6,6]
-CONV_T_STRIDES = [2,2,2,2]
-CONV_T_ACTIVATIONS = ['relu','relu','relu','sigmoid']
-
-Z_DIM = 32
-
-BATCH_SIZE = 100
+# Definição das dimensões de entrada e do espaço latente
+INPUT_DIM = (64, 64, 3)  # Dimensões de entrada (altere conforme necessário)
+Z_DIM = 32  # Dimensão do espaço latente
+BATCH_SIZE = 100  # Tamanho do lote (pode ser alterado para testar)
 LEARNING_RATE = 0.0001
 KL_TOLERANCE = 0.5
 
-print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
+# Camadas de convolução e filtros (altere conforme necessário)
+CONV_FILTERS = [32, 64, 64, 128]
+CONV_KERNEL_SIZES = [4, 4, 4, 4]
+CONV_STRIDES = [2, 2, 2, 2]
+CONV_ACTIVATIONS = ['relu', 'relu', 'relu', 'relu']
 
-"""
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
-    try:
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
-    except RuntimeError as e:
-        print(e)
-"""
+DENSE_SIZE = 1024
+
+CONV_T_FILTERS = [64, 64, 32, 3]
+CONV_T_KERNEL_SIZES = [5, 5, 6, 6]
+CONV_T_STRIDES = [2, 2, 2, 2]
+CONV_T_ACTIVATIONS = ['relu', 'relu', 'relu', 'sigmoid']
 
 class Sampling(Layer):
     def call(self, inputs):
         mu, log_var = inputs
         epsilon = K.random_normal(shape=K.shape(mu), mean=0., stddev=1.)
         return mu + K.exp(log_var / 2) * epsilon
-
 
 class VAEModel(Model):
     def __init__(self, encoder, decoder, r_loss_factor, **kwargs):
@@ -52,6 +38,10 @@ class VAEModel(Model):
         self.decoder = decoder
         self.r_loss_factor = r_loss_factor
 
+    def __call__(self, inputs, training=False):
+        z_mean, z_log_var, z = self.encoder(inputs)
+        return self.decoder(z)
+
     def train_step(self, data):
         if isinstance(data, tuple):
             data = data[0]
@@ -59,11 +49,11 @@ class VAEModel(Model):
             z_mean, z_log_var, z = self.encoder(data)
             reconstruction = self.decoder(z)
             reconstruction_loss = tf.reduce_mean(
-                tf.square(data - reconstruction), axis = [1,2,3]
+                tf.square(data - reconstruction), axis=[1,2,3]
             )
             reconstruction_loss *= self.r_loss_factor
             kl_loss = 1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
-            kl_loss = tf.reduce_sum(kl_loss, axis = 1)
+            kl_loss = tf.reduce_sum(kl_loss, axis=1)
             kl_loss *= -0.5
             total_loss = reconstruction_loss + kl_loss
         grads = tape.gradient(total_loss, self.trainable_weights)
@@ -73,11 +63,6 @@ class VAEModel(Model):
             "reconstruction_loss": reconstruction_loss,
             "kl_loss": kl_loss,
         }
-    
-    def call(self,inputs):
-        latent = self.encoder(inputs)
-        return self.decoder(latent)
-
 
 class VAE():
     def __init__(self):
@@ -86,14 +71,13 @@ class VAE():
         self.encoder = self.models[1]
         self.decoder = self.models[2]
 
-        self.input_dim = INPUT_DIM
-        self.z_dim = Z_DIM
-        self.learning_rate = LEARNING_RATE
-        self.kl_tolerance = KL_TOLERANCE
+    def __call__(self, inputs, training=False):
+        z_mean, z_log_var, z = self.encoder(inputs)
+        return self.decoder(z)
 
     def _build(self):
         vae_x = Input(shape=INPUT_DIM, name='observation_input')
-        vae_c1 = Conv2D(filters = CONV_FILTERS[0], kernel_size = CONV_KERNEL_SIZES[0], strides = CONV_STRIDES[0], activation=CONV_ACTIVATIONS[0], name='conv_layer_1')(vae_x)
+        vae_c1 = Conv2D(filters=CONV_FILTERS[0], kernel_size=CONV_KERNEL_SIZES[0], strides=CONV_STRIDES[0], activation=CONV_ACTIVATIONS[0], name='conv_layer_1')(vae_x)
         vae_c2 = Conv2D(filters = CONV_FILTERS[1], kernel_size = CONV_KERNEL_SIZES[1], strides = CONV_STRIDES[1], activation=CONV_ACTIVATIONS[0], name='conv_layer_2')(vae_c1)
         vae_c3= Conv2D(filters = CONV_FILTERS[2], kernel_size = CONV_KERNEL_SIZES[2], strides = CONV_STRIDES[2], activation=CONV_ACTIVATIONS[0], name='conv_layer_3')(vae_c2)
         vae_c4= Conv2D(filters = CONV_FILTERS[3], kernel_size = CONV_KERNEL_SIZES[3], strides = CONV_STRIDES[3], activation=CONV_ACTIVATIONS[0], name='conv_layer_4')(vae_c3)
@@ -116,20 +100,28 @@ class VAE():
         vae_d4 = Conv2DTranspose(filters = CONV_T_FILTERS[3], kernel_size = CONV_T_KERNEL_SIZES[3] , strides = CONV_T_STRIDES[3], activation=CONV_T_ACTIVATIONS[3], name='deconv_layer_4')(vae_d3)
         
         #### MODELS
-        vae_encoder = Model(vae_x, [vae_z_mean, vae_z_log_var, vae_z], name = 'encoder')
-        vae_decoder = Model(vae_z_input, vae_d4, name = 'decoder')
+        vae_encoder = Model(vae_x, [vae_z_mean, vae_z_log_var, vae_z], name='encoder')
+        vae_decoder = Model(vae_z_input, vae_d4, name='decoder')
 
         vae_full = VAEModel(vae_encoder, vae_decoder, 10000)
-
         opti = Adam(learning_rate=LEARNING_RATE)
         vae_full.compile(optimizer=opti)
-        
-        return (vae_full,vae_encoder, vae_decoder)
+
+        return (vae_full, vae_encoder, vae_decoder)
 
     def set_weights(self, filepath):
         self.full_model.load_weights(filepath)
 
     def train(self, data):
+        # Verifique se os dados estão no formato correto
+        if data.shape[1:] != INPUT_DIM:
+            raise ValueError("Dimensão dos dados de entrada incorreta. Esperado: {}, Recebido: {}".format(INPUT_DIM, data.shape[1:]))
+
+        # Verifique se o tamanho do lote nos dados é consistente com BATCH_SIZE
+        if data.shape[0] % BATCH_SIZE != 0:
+            raise ValueError("Tamanho do lote nos dados não é um múltiplo do BATCH_SIZE configurado.")
+
+        # Proceda com o treinamento
         self.full_model.fit(data, data, shuffle=True, epochs=1, batch_size=BATCH_SIZE)
         
     def save_weights(self, filepath):
