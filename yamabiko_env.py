@@ -57,8 +57,8 @@ class YamabikoEnv(gym.Env):
     def image_callback(self, msg):
         try:
             pil_image = PILImage.open(io.BytesIO(msg.data))
-            cv_image = np.array(pil_image)  # Converter para um array numpy
-            self.current_image = cv2.resize(cv_image, (64, 64))
+            self.current_image = np.array(pil_image)  # Converter para um array numpy
+            # self.current_image = cv2.resize(cv_image, (64, 64))
         except CvBridgeError as e:
             print(e)
 
