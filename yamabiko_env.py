@@ -25,7 +25,7 @@ class YamabikoEnv(gym.Env):
         self.observation_space = spaces.Box(low=0, high=255, shape=(64, 64, 3), dtype=np.uint8)
 
         # Inicializa a comunicação ROS2
-        self.image_subscriber = self.node.create_subscription(Image, '/Robot/camera/image_raw', self.image_callback, 10)
+        self.image_subscriber = self.node.create_subscription(Image, '/Robot/camera/image_raw', self.image_callback, 1)
         self.scan_subscriber = self.node.create_subscription(LaserScan, '/Robot/scan', self.scan_callback, 10)
         self.collision_subscriber = self.node.create_subscription(Int32, '/Robot/collision', self.collision_callback, 10)
         self.reward_subscriber = self.node.create_subscription(Int32, '/global_reward', self.reward_callback, 10)
@@ -57,8 +57,8 @@ class YamabikoEnv(gym.Env):
     def image_callback(self, msg):
         try:
             pil_image = PILImage.open(io.BytesIO(msg.data))
-            self.current_image = np.array(pil_image)  # Converter para um array numpy
-            # self.current_image = cv2.resize(cv_image, (64, 64))
+            cv_image = np.array(pil_image)  # Converter para um array numpy
+            self.current_image = cv2.resize(cv_image, (64, 64))
         except CvBridgeError as e:
             print(e)
 
