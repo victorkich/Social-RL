@@ -9,16 +9,16 @@ from IPython.display import display
 import torch.nn.functional as F
 
 # Substitua pelo caminho correto do seu arquivo de definição do modelo VAE em PyTorch
-from vae.arch_torch import VAE
+from baseline.module.vanilla_vae import VanillaVAE
 from ipywidgets import interact
 
-Z_DIM = 32
+latent_dim = 1024
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 np.set_printoptions(precision=4, suppress=True)
 
 # Carregar o modelo PyTorch VAE
-vae = VAE()
+vae = VAE(in_channels=3, latent_dim=latent_dim).to(device)
 vae.load_state_dict(torch.load('./vae/weights.pth', map_location=torch.device(device)))
 vae.eval()  # Coloca o modelo em modo de avaliação
 
@@ -50,15 +50,11 @@ def visualize_reconstruction(obs, vae_model):
     obs_tensor = torch.tensor([obs_processed], dtype=torch.float32)
 
     with torch.no_grad():
-        #z_decoded = vae_model(obs_tensor)[0]
-        #print(z_decoded)
         mu, log_var = vae.encoder(obs_tensor)
         z = vae.sampling(mu, log_var)
         z_decoded = vae.decoder(z)
         BCE = F.binary_cross_entropy(z_decoded, obs_tensor, reduction='sum')
         KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
-        print(BCE + KLD)
-        print(mu, log_var)
         z_decoded = np.transpose(z_decoded.cpu().numpy()[0], (1, 2, 0))
 
     obs_to_show = np.transpose(obs_processed, (1, 2, 0)) if obs_processed.ndim == 3 else obs

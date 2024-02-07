@@ -12,6 +12,7 @@ from PIL import Image as PILImage
 import io
 import threading
 
+
 class YamabikoEnv(gym.Env, Node):  # Herda de Node
     def __init__(self):
         # Inicialize o node ROS2 como parte da inicialização da classe
@@ -19,7 +20,7 @@ class YamabikoEnv(gym.Env, Node):  # Herda de Node
 
         # Define ações e espaços de observação
         self.action_space = spaces.Box(
-            low=np.array([-1.0, -1.0, 0], dtype=np.float32), 
+            low=np.array([-1.0, -1.0, 0], dtype=np.float32),
             high=np.array([1.0, 1.0, 1], dtype=np.float32),
         )
         self.observation_space = spaces.Box(low=0, high=255, shape=(64, 64, 3), dtype=np.uint8)
@@ -67,7 +68,6 @@ class YamabikoEnv(gym.Env, Node):  # Herda de Node
             pil_image = PILImage.open(io.BytesIO(msg.data))
             cv_image = np.array(pil_image)  # Converter para um array numpy
             self.current_image = cv2.resize(cv_image, (64, 64))
-            print("Nova image")
         except CvBridgeError as e:
             print(e)
 

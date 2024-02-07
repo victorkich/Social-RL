@@ -19,12 +19,12 @@ def convert_npz2img(src: str = "../data/rollout", dst: str = "vae_dataset"):
             img.save(os.path.join(dst, f"{i}_{j}.png"))
 
 
-def encode_dataset2latent(start_rollout: int, end_rollout: int, src: str, dst: str, type_encoder: str):
+def encode_dataset2latent(src: str = "vae_dataset", dst: str = "latent", type_encoder: str):
     """encode .npz rollouts to latent vectors for training rnn efficiently"""
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     if type_encoder == 'vae':
-        params = torch.load("pretrained/vae.pt")
+        params = torch.load("../pretrained/vae.pt")
         encoder = VAE(img_channels=3, latent_size=32)
         encoder.load_state_dict(params)
         encoder = encoder.to(device)
@@ -46,14 +46,13 @@ def encode_dataset2latent(start_rollout: int, end_rollout: int, src: str, dst: s
 
     for i in range(start_rollout, end_rollout):
         data = np.load(os.path.join(src, f"{i}.npz"))
-        obs = data["states"]
+        obs = data["obs"]
         act = data["act"]
-        next_obs = data["next_states"]
+        next_obs = data["next_obs"]
 
         latent_obs = encode_batch_obs(obs)
         latent_next_obs = encode_batch_obs(next_obs)
-        np.savez(os.path.join(dst, f"{i}"), latent_obs=latent_obs,
-                 act=act, latent_next_obs=latent_next_obs)
+        np.savez(os.path.join(dst, f"{i}"), latent_obs=latent_obs, act=act, latent_next_obs=latent_next_obs)
 
 
 if __name__ == "__main__":
@@ -69,6 +68,3 @@ if __name__ == "__main__":
     else:
         raise ValueError("invalid argument")
 
-# usage:
-# python dataset_generate.py --raw2latent --start 0 --end 1000 --src dataset --dst vae_dataset
-# python dataset_generate.py --npz2img --start 0 --end 200 --src dataset --dst vae_dataset
