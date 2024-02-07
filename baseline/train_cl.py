@@ -4,26 +4,28 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from sklearn.model_selection import train_test_split
 from PIL import Image
-from torchvision.transforms import Compose, Resize, ToTensor, RandomHorizontalFlip
 import os
 from module.curl import make_agent
+from tqdm import tqdm
+from torchvision.transforms import v2
 
-# Define image transformation
-transform = Compose([
-    ToTensor(),
-    RandomHorizontalFlip(p=0.5),
-    Resize((76, 76))
+transform = v2.Compose([
+    v2.ToDtype(torch.float),
+    v2.RandomHorizontalFlip(p=0.5),
 ])
 
-# Function to transform image
 def img_transform(frame: np.ndarray):
-    frame = transform(Image.fromarray(frame))
-    assert frame.shape == (3, 76, 76), f"frame shape is {frame.shape}"
+    # Converter a imagem PIL para um tensor do PyTorch
+    frame = to_tensor(frame)
+    # Aplicar as transformações
+    frame = transform(frame)
+    # Verificação de forma pode ser mantida se a transformação resultar na forma esperada
+    assert frame.shape == (3, 64, 64), f"frame shape is {frame.shape}"
     return frame
 
 # CLDataset class
 class CLDataset(Dataset):
-    def __init__(self, root_dir="vae_dataset", meta_file="meta.json"):
+    def __init__(self, root_dir="vae_dataset"):
         self.root_dir = root_dir
         self.filenames = os.listdir(self.root_dir)
 
@@ -37,20 +39,21 @@ class CLDataset(Dataset):
 
 # Main training function
 def train_cl():
-    EPOCHS = 150
-    print('Starting training...')
-    dataset = CLDataset("/home/dranaju/vae_dataset")
+    EPOCHS = 2000
+    batch_size = 1024
+    dataset = CLDataset("vae_dataset")
     writer = SummaryWriter("log/curl")
     train_dataset, test_dataset = train_test_split(dataset, test_size=0.2)
-    train_dataloader = DataLoader(train_dataset, batch_size=512, shuffle=True)
-    test_dataloader = DataLoader(test_dataset, batch_size=512, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     agent = make_agent(device, encoder_feature_dim=32)
     step = 0
-    #agent.load()
 
-    for epoch in range(EPOCHS):
+    # training pipeline
+    print("---- TRAINING CL ----")
+    for epoch in tqdm(range(EPOCHS)):
         agent.CURL.train()
         losses = []
         print(f'Epoch {epoch}')
@@ -64,15 +67,13 @@ def train_cl():
 
         agent.CURL.eval()
         losses = []
-        print(f'Evaluate')
         with torch.no_grad():
             for batch_raw in test_dataloader:
                 batch_raw = batch_raw.to(device)
                 loss = agent.update(batch_raw, step, writer, training=False)
-                # step += 1
                 losses.append(loss.item())
         writer.add_scalar("test/loss", np.mean(losses), epoch)
-        # agent.save_curl()
+
 
 if __name__ == "__main__":
     train_cl()

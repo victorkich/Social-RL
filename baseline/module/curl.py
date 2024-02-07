@@ -1,4 +1,3 @@
-import gymnasium as gym
 import torch
 import torch.nn as nn
 import numpy as np
@@ -19,7 +18,7 @@ def soft_update_params(net, target_net, tau):
 # PixelEncoder class
 class PixelEncoder(nn.Module):
     """Convolutional encoder of pixels observations."""
-    def __init__(self, feature_dim, num_layers=2, num_filters=32, output_logits=False):
+    def __init__(self, feature_dim, num_layers=3, num_filters=32, output_logits=False):
         super().__init__()
         self.feature_dim = feature_dim
         self.num_layers = num_layers
@@ -164,12 +163,12 @@ class CurlAgent(object):
     
     def save_curl(self):
         torch.save(
-            self.CURL.state_dict(), 'pretrained/curl.pt'
+            self.CURL.state_dict(), '../pretrained/curl.pt'
         )
 
     def load(self):
         self.CURL.load_state_dict(
-            torch.load('pretrained/curl.pt')
+            torch.load('../pretrained/curl.pt')
         )
 
 # Function to make CurlAgent

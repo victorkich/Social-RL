@@ -5,13 +5,15 @@ from module.vae import VAE
 from module.curl import make_agent
 import os
 import argparse
+from tqdm import tqdm
 
 
-def convert_npz2img(start_rollout: int, end_rollout: int, src: str = "dataset", dst: str = "vae_dataset"):
+def convert_npz2img(src: str = "../data/rollout", dst: str = "vae_dataset"):
     """convert npz to raw png images for training vae efficiently"""
-    for i in range(start_rollout, end_rollout):
-        data = np.load(os.path.join(src, f"{i}.npz"))
-        obs = data["states"]
+    filenames = os.listdir(src)
+    for i, file in tqdm(enumerate(filenames)):
+        data = np.load(os.path.join(src, file))
+        obs = data["obs"]
         for j in range(obs.shape[0]):
             img = Image.fromarray(obs[j])
             img.save(os.path.join(dst, f"{i}_{j}.png"))
@@ -55,27 +57,15 @@ def encode_dataset2latent(start_rollout: int, end_rollout: int, src: str, dst: s
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="preprocess the collected rollouts")
-    parser.add_argument(
-        "--raw2latent", help="convert raw frames npz to latent vector and store in a .npz file")
-    parser.add_argument("--npz2img", help="convert npz to raw png images")
-    parser.add_argument("--start", type=int, default=0,
-                        help="rollout start index")
-    parser.add_argument("--end", type=int, default=200,
-                        help="rollout end index")
-    parser.add_argument("--src", type=str, required=True, help="source dir")
-    parser.add_argument("--dst", type=str, required=True,
-                        help="destination dir")
-    parser.add_argument("--encoder", type=str, required=True,
-                        help="encoder type")
-
+    parser = argparse.ArgumentParser(description="preprocess the collected rollouts")
+    parser.add_argument("--raw2latent", action="store_true", help="convert raw frames npz to latent vector and store in a .npz file")
+    parser.add_argument("--npz2img", action="store_true", help="convert npz to raw png images")
     args = parser.parse_args()
 
     if args.raw2latent:
-        encode_dataset2latent(args.start, args.end, args.src, args.dst, args.encoder)
+        encode_dataset2latent()
     elif args.npz2img:
-        convert_npz2img(args.start, args.end, args.src, args.dst)
+        convert_npz2img()
     else:
         raise ValueError("invalid argument")
 
