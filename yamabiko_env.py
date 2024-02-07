@@ -10,12 +10,12 @@ import cv2
 from cv_bridge import CvBridge, CvBridgeError
 from PIL import Image as PILImage
 import io
+import threading
 
-class YamabikoEnv(gym.Env):
+class YamabikoEnv(gym.Env, Node):  # Herda de Node
     def __init__(self):
-        # Inicialize o node ROS2
-        rclpy.init(args=None)
-        self.node = rclpy.create_node('yamabiko_gym_env')
+        # Inicialize o node ROS2 como parte da inicialização da classe
+        super().__init__('yamabiko_gym_env')  # Nome do node
 
         # Define ações e espaços de observação
         self.action_space = spaces.Box(
@@ -25,40 +25,49 @@ class YamabikoEnv(gym.Env):
         self.observation_space = spaces.Box(low=0, high=255, shape=(64, 64, 3), dtype=np.uint8)
 
         # Inicializa a comunicação ROS2
-        self.image_subscriber = self.node.create_subscription(Image, '/Robot/camera/image_raw', self.image_callback, 1)
-        self.scan_subscriber = self.node.create_subscription(LaserScan, '/Robot/scan', self.scan_callback, 10)
-        self.collision_subscriber = self.node.create_subscription(Int32, '/Robot/collision', self.collision_callback, 10)
-        self.reward_subscriber = self.node.create_subscription(Int32, '/global_reward', self.reward_callback, 10)
-        self.ball_distance_subscriber = self.node.create_subscription(Float32, '/Robot/ball_distance', self.ball_distance_callback, 10)
-        self.ball_possession_subscriber = self.node.create_subscription(Bool, '/Robot/ball_possession', self.ball_possession_callback, 10)
-        self.green_area_distance_subscriber = self.node.create_subscription(Float32, '/Robot/green_area_distance', self.green_area_distance_callback, 10)
+        self.image_subscriber = self.create_subscription(Image, '/Robot/camera/image_raw', self.image_callback, 1)
+        self.scan_subscriber = self.create_subscription(LaserScan, '/Robot/scan', self.scan_callback, 10)
+        self.collision_subscriber = self.create_subscription(Int32, '/Robot/collision', self.collision_callback, 10)
+        self.reward_subscriber = self.create_subscription(Int32, '/global_reward', self.reward_callback, 10)
+        self.ball_distance_subscriber = self.create_subscription(Float32, '/Robot/ball_distance', self.ball_distance_callback, 10)
+        self.ball_possession_subscriber = self.create_subscription(Bool, '/Robot/ball_possession', self.ball_possession_callback, 10)
+        self.green_area_distance_subscriber = self.create_subscription(Float32, '/Robot/green_area_distance', self.green_area_distance_callback, 10)
 
-        self.cmd_vel_publisher = self.node.create_publisher(Twist, '/Robot/cmd_vel', 10)
-        self.claw_publisher = self.node.create_publisher(Bool, '/Robot/claw', 10)
-        self.room_size_publisher = self.node.create_publisher(Int32MultiArray, '/reset', 10)
+        self.cmd_vel_publisher = self.create_publisher(Twist, '/Robot/cmd_vel', 10)
+        self.claw_publisher = self.create_publisher(Bool, '/Robot/claw', 10)
+        self.room_size_publisher = self.create_publisher(Int32MultiArray, '/reset', 10)
 
-        # Novas variáveis para armazenar os estados
+        # Variáveis para armazenar os estados
         self.current_ball_distance = None
         self.current_ball_possession = False
         self.current_green_area_distance = None
-
-        # Inicializa as melhores distâncias com um valor alto
-        self.best_ball_distance = float('inf')
-        self.best_green_area_distance = float('inf')
-        self.has_ball = False  # Se o agente pegou a bola
-
-        # Variáveis para armazenar dados recebidos
         self.current_image = None
         self.current_scan = None
         self.current_collision = None
         self.current_reward = None
         self.bridge = CvBridge()
 
+        # Inicializa as melhores distâncias com um valor alto
+        self.best_ball_distance = float('inf')
+        self.best_green_area_distance = float('inf')
+        self.has_ball = False
+
+        # Inicie a thread de spin em um método separado para manter o __init__ limpo
+        self.start_ros_spin_thread()
+
+        self.previous_image = None
+
+    def start_ros_spin_thread(self):
+        # Roda rclpy.spin em uma thread separada para não bloquear o loop principal
+        thread = threading.Thread(target=rclpy.spin, args=(self,), daemon=True)
+        thread.start()
+
     def image_callback(self, msg):
         try:
             pil_image = PILImage.open(io.BytesIO(msg.data))
             cv_image = np.array(pil_image)  # Converter para um array numpy
             self.current_image = cv2.resize(cv_image, (64, 64))
+            print("Nova image")
         except CvBridgeError as e:
             print(e)
 
@@ -99,11 +108,14 @@ class YamabikoEnv(gym.Env):
         # Set claw state based on the action
         self.set_claw_state(open_claw=float(action[2]) > 0.5)
 
-        # Wait for new observations
-        rclpy.spin_once(self.node, timeout_sec=0.1)
+        rclpy.spin_once(self, timeout_sec=0.1)  # Alterado de self.node para self
+
+        while np.array_equal(self.current_image, self.previous_image):
+            rclpy.spin_once(self, timeout_sec=0.1)  # Alterado de self.node para self
 
         # Assemble the observation using only the image
         observation = self.current_image
+        self.previous_image = observation
 
         reward = 0  # Inicializa a recompensa como 0
         done = False
@@ -158,6 +170,8 @@ class YamabikoEnv(gym.Env):
             done = True
             reward = -1  # Assign a negative reward for collision
 
+        rclpy.spin_once(self, timeout_sec=0.1)
+
         # Return observation, reward, done, and info
         return observation, reward, done, {}
 
@@ -181,6 +195,8 @@ class YamabikoEnv(gym.Env):
         self.current_collision = 0
         self.current_reward = 0
         self.set_claw_state(open_claw=False)  # Start with the claw closed
+        self.current_image = None
+        self.previous_image = None
 
         # Inicializa as melhores distâncias com um valor alto
         self.best_ball_distance = float('inf')
@@ -188,13 +204,15 @@ class YamabikoEnv(gym.Env):
         self.has_ball = False  # Se o agente pegou a bola
 
         # Wait for the environment to reset
-        rclpy.spin_once(self.node, timeout_sec=0.1)
+        rclpy.spin_once(self, timeout_sec=0.1)  # Alterado de self.node para self
 
         # Get the initial observation by waiting for the next image message
         while self.current_image is None:
-            rclpy.spin_once(self.node, timeout_sec=0.1)
+            rclpy.spin_once(self, timeout_sec=0.1)  # Alterado de self.node para self
 
-        # Return the initial observation as a dictionary
+        self.previous_image = self.current_image
+
+        # Return the initial observation
         initial_observation = {
             "image": self.current_image,
             "scan": self.current_scan,
@@ -202,10 +220,7 @@ class YamabikoEnv(gym.Env):
         }
         return initial_observation
 
-    def render(self, mode='human'):
-        pass
-
     def close(self):
-        # Limpar recursos
-        self.node.destroy_node()
+        # Sobreescrita para garantir uma parada limpa da thread
+        super().destroy_node()  # Destruir o nó antes de chamar rclpy.shutdown
         rclpy.shutdown()

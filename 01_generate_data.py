@@ -1,5 +1,6 @@
 # xvfb-run -s "-screen 0 1400x900x24" python 01_generate_data.py car_racing --total_episodes 4000 --time_steps 300
 
+import rclpy
 import numpy as np
 import random
 import argparse
@@ -15,6 +16,7 @@ def main(args):
     render = args.render
     run_all_envs = args.run_all_envs
     action_refresh_rate = args.action_refresh_rate
+    rclpy.init(args=None)
 
     if run_all_envs:
         envs_to_generate = config.train_envs
@@ -33,8 +35,6 @@ def main(args):
             filename = DIR_NAME + str(episode_id) + ".npz"
 
             observation = env.reset_environment()
-
-            # env.render()
 
             t = 0
 
@@ -64,13 +64,10 @@ def main(args):
 
                 t = t + 1
 
-                # if render:
-                #    env.render()
-
                 if done:
                     observation = env.reset_environment()
-                else:
-                    time.sleep(0.2)
+
+                time.sleep(0.2)
 
             print("Episode {} finished after {} timesteps".format(s, t))
             np.savez_compressed(filename, obs=obs_sequence, action=action_sequence, reward=reward_sequence, done=done_sequence)  # <4>
@@ -78,6 +75,8 @@ def main(args):
             s = s + 1
 
         env.close()
+        # env.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=('Create new training data'))
