@@ -1,4 +1,6 @@
 import torch
+import torchvision
+torchvision.disable_beta_transforms_warning()
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
@@ -9,8 +11,6 @@ from module.curl import make_agent
 from torchvision.transforms.functional import to_tensor
 from tqdm import tqdm
 from torchvision.transforms import v2
-import torchvision
-torchvision.disable_beta_transforms_warning()
 
 transform = v2.Compose([
     v2.Resize((76, 76), antialias=True),

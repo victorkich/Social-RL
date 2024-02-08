@@ -59,7 +59,7 @@ class VAERolloutDataset(Dataset):
         return raw
 
 def train_vae():
-    EPOCH = 4000
+    EPOCH = 10000
     batch_size = 1024
     latent_dim = 32
     dataset = VAEDataset("vae_dataset")

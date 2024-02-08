@@ -1,9 +1,0 @@
-__pycache__
-dataset
-log
-pretrained
-result
-a2c_result
-rnn_dataset
-vae_dataset
-test.py
