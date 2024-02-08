@@ -6,10 +6,14 @@ from sklearn.model_selection import train_test_split
 from PIL import Image
 import os
 from module.curl import make_agent
+from torchvision.transforms.functional import to_tensor
 from tqdm import tqdm
 from torchvision.transforms import v2
+import torchvision
+torchvision.disable_beta_transforms_warning()
 
 transform = v2.Compose([
+    v2.Resize((76, 76), antialias=True),
     v2.ToDtype(torch.float),
     v2.RandomHorizontalFlip(p=0.5),
 ])
@@ -20,7 +24,7 @@ def img_transform(frame: np.ndarray):
     # Aplicar as transformações
     frame = transform(frame)
     # Verificação de forma pode ser mantida se a transformação resultar na forma esperada
-    assert frame.shape == (3, 64, 64), f"frame shape is {frame.shape}"
+    assert frame.shape == (3, 76, 76), f"frame shape is {frame.shape}"
     return frame
 
 # CLDataset class
@@ -39,8 +43,9 @@ class CLDataset(Dataset):
 
 # Main training function
 def train_cl():
-    EPOCHS = 2000
+    EPOCHS = 10000
     batch_size = 1024
+    latent_dim = 32
     dataset = CLDataset("vae_dataset")
     writer = SummaryWriter("log/curl")
     train_dataset, test_dataset = train_test_split(dataset, test_size=0.2)
@@ -48,7 +53,7 @@ def train_cl():
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    agent = make_agent(device, encoder_feature_dim=32)
+    agent = make_agent(device, encoder_feature_dim=latent_dim)
     step = 0
 
     # training pipeline
@@ -56,7 +61,6 @@ def train_cl():
     for epoch in tqdm(range(EPOCHS)):
         agent.CURL.train()
         losses = []
-        print(f'Epoch {epoch}')
         for batch_raw in train_dataloader:
             batch_raw = batch_raw.to(device)
             loss = agent.update(batch_raw, step, writer)

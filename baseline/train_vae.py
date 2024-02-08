@@ -11,12 +11,13 @@ from PIL import Image
 import torch.nn as nn
 from torchvision.transforms.functional import to_tensor
 from tqdm import tqdm
+import torchvision
+torchvision.disable_beta_transforms_warning()
 
 transform = v2.Compose([
     v2.ToDtype(torch.float),
     v2.RandomHorizontalFlip(p=0.5),
 ])
-
 
 def img_transform(frame: np.ndarray):
     # Converter a imagem PIL para um tensor do PyTorch
@@ -26,7 +27,6 @@ def img_transform(frame: np.ndarray):
     # Verificação de forma pode ser mantida se a transformação resultar na forma esperada
     assert frame.shape == (3, 64, 64), f"frame shape is {frame.shape}"
     return frame
-
 
 class VAEDataset(Dataset):
     def __init__(self, root_dir: str = "vae_dataset"):
@@ -40,7 +40,6 @@ class VAEDataset(Dataset):
         img = Image.open(os.path.join(self.root_dir, self.filenames[idx]))
         raw = img_transform(img)
         return raw
-
 
 class VAERolloutDataset(Dataset):
     def __init__(self, root_dir: str = "dataset", meta_file: str = "meta.json", episode_len: int = 200):
@@ -59,11 +58,10 @@ class VAERolloutDataset(Dataset):
         raw = img_transform(raw)
         return raw
 
-
 def train_vae():
     EPOCH = 4000
     batch_size = 1024
-    latent_dim = 1024
+    latent_dim = 32
     dataset = VAEDataset("vae_dataset")
     min_loss = np.inf
     writer = SummaryWriter("log/vae2")

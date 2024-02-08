@@ -175,7 +175,7 @@ class CurlAgent(object):
 def make_agent(device, encoder_feature_dim=32):
     return CurlAgent(
         device=device,
-        encoder_feature_dim=32,
+        encoder_feature_dim=encoder_feature_dim,
         encoder_lr=1e-3,
         encoder_tau=0.05,
         num_layers=4,

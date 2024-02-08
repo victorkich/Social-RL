@@ -19,7 +19,7 @@ def convert_npz2img(src: str = "../data/rollout", dst: str = "vae_dataset"):
             img.save(os.path.join(dst, f"{i}_{j}.png"))
 
 
-def encode_dataset2latent(src: str = "vae_dataset", dst: str = "latent", type_encoder: str):
+def encode_dataset2latent(src: str = "vae_dataset", dst: str = "latent", type_encoder: str = "vae"):
     """encode .npz rollouts to latent vectors for training rnn efficiently"""
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
