@@ -252,7 +252,7 @@ class CurlAgent(object):
         torch.save(self.CURL.state_dict(), '../pretrained/curl2.pt')
 
     def load(self):
-        self.CURL.load_state_dict(torch.load('../pretrained/curl2.pt'))
+        self.CURL.load_state_dict(torch.load('../pretrained/curl2.pt', map_location=self.device))
 
 # Function to make CurlAgent
 def make_agent(device, encoder_feature_dim=32):
