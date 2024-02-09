@@ -159,17 +159,12 @@ class CurlAgent(object):
         obs = torch.as_tensor(obs, device=self.device).float()
         z_a = self.CURL.encode(obs, detach=True)
         return z_a
-
     
     def save_curl(self):
-        torch.save(
-            self.CURL.state_dict(), '../pretrained/curl.pt'
-        )
+        torch.save(self.CURL.state_dict(), '../pretrained/curl.pt')
 
     def load(self):
-        self.CURL.load_state_dict(
-            torch.load('../pretrained/curl.pt')
-        )
+        self.CURL.load_state_dict(torch.load('../pretrained/curl.pt'))
 
 # Function to make CurlAgent
 def make_agent(device, encoder_feature_dim=32):

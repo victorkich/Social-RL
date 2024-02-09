@@ -42,8 +42,7 @@ class VAEDataset(Dataset):
         return raw
 
 class VAERolloutDataset(Dataset):
-    def __init__(self, root_dir: str = "dataset", meta_file: str = "meta.json", episode_len: int = 200):
-        self.meta_file = meta_file
+    def __init__(self, root_dir: str = "dataset", episode_len: int = 200):
         self.root_dir = root_dir
         self.filenames = os.listdir(self.root_dir)
         self.episode_len = episode_len
@@ -53,7 +52,7 @@ class VAERolloutDataset(Dataset):
 
     def __getitem__(self, index):
         data = np.load(os.path.join(self.root_dir, f"{index}.npz"))
-        frames = data["states"].astype(np.uint8)
+        frames = data["obs"].astype(np.uint8)
         frames = frames.transpose(0, 3, 1, 2)
         raw = img_transform(raw)
         return raw
